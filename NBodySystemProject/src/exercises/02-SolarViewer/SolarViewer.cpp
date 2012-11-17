@@ -58,13 +58,9 @@ init()
 	m_moonScale = 50.0;
 	m_earthScale = m_moonScale * 2.0;
 	m_sunScale = m_moonScale * 5.0;
-    
 	m_starsScale = m_moonScale * 100.0;
 	
-    
-    m_sunTransX = m_sunScale + 1250;
-    m_sunTransY = m_sunScale - 1250;
-    m_sunTransZ = m_sunScale + 2000;
+	m_earthTrans = m_sunScale + 1250;
 	m_moonTrans = m_earthTrans + m_earthScale + 200;
 	
 	m_starsScale = m_moonScale * 100.0;
@@ -124,7 +120,7 @@ load_mesh(const std::string& filenameObj, MeshType type)
 	Vector3 center;
 	switch(type)
 	{
-		case STARS:
+        case STARS:
 			// load mesh from obj
 			Mesh3DReader::read( filenameObj, m_Stars);
 			
@@ -148,71 +144,77 @@ load_mesh(const std::string& filenameObj, MeshType type)
 			break;
 		case SUN1:
 			// load mesh from obj
-			Mesh3DReader::read( filenameObj, m_Sun);
+			Mesh3DReader::read( filenameObj, m_Sun1);
 			
 			// calculate normals
-			if(!m_Sun.hasNormals())
-				m_Sun.calculateVertexNormals();
+			if(!m_Sun1.hasNormals())
+				m_Sun1.calculateVertexNormals();
 			
 			//Exercise 4.2: Scale the sun using the attribute m_sunScale
-            m_Sun.scaleObject(Vector3(m_sunScale, m_sunScale, m_sunScale));
-            m_Sun.translateObject(Vector3(m_sunTransX, m_sunTransY, m_sunTransZ));
+            m_Sun1.scaleObject(Vector3(m_sunScale, m_sunScale, m_sunScale));
+        //    m_Sun1.translateObject(Vector3(m_sunTransX, m_sunTransY, m_sunTransZ));
 			
 			//Exercise 4.4: Set the light position to the center of the sun
             
 			
-			m_showTextureSun = m_Sun.hasUvTextureCoord();
+			m_showTextureSun = m_Sun1.hasUvTextureCoord();
 			break;
         case SUN2:
 			// load mesh from obj
-			Mesh3DReader::read( filenameObj, m_Sun);
+			Mesh3DReader::read( filenameObj, m_Sun2);
 			
 			// calculate normals
-			if(!m_Sun.hasNormals())
-				m_Sun.calculateVertexNormals();
+			if(!m_Sun2.hasNormals())
+				m_Sun2.calculateVertexNormals();
 			
 			//Exercise 4.2: Scale the sun using the attribute m_sunScale
-            m_Sun.scaleObject(Vector3(m_sunScale, m_sunScale, m_sunScale));
+            m_Sun2.scaleObject(Vector3(m_sunScale, m_sunScale, m_sunScale));
+            
+            m_Sun2.translateObject(Vector3(-m_sunTransX, -m_sunTransY, -m_sunTransZ));
 			
 			//Exercise 4.4: Set the light position to the center of the sun
             
 			
-			m_showTextureSun = m_Sun.hasUvTextureCoord();
+			m_showTextureSun = m_Sun2.hasUvTextureCoord();
 			break;
         case SUN3:
 			// load mesh from obj
-			Mesh3DReader::read( filenameObj, m_Sun);
+			Mesh3DReader::read( filenameObj, m_Sun2);
 			
 			// calculate normals
-			if(!m_Sun.hasNormals())
-				m_Sun.calculateVertexNormals();
+			if(!m_Sun3.hasNormals())
+				m_Sun3.calculateVertexNormals();
 			
 			//Exercise 4.2: Scale the sun using the attribute m_sunScale
-            m_Sun.scaleObject(Vector3(m_sunScale, m_sunScale, m_sunScale));
+            m_Sun3.scaleObject(Vector3(m_sunScale, m_sunScale, m_sunScale));
+            
+            m_Sun3.translateObject(Vector3(m_sunTransX, -m_sunTransY, -m_sunTransZ));
 			
 			//Exercise 4.4: Set the light position to the center of the sun
             
 			
-			m_showTextureSun = m_Sun.hasUvTextureCoord();
+			m_showTextureSun = m_Sun3.hasUvTextureCoord();
 			break;
         case SUN4:
 			// load mesh from obj
-			Mesh3DReader::read( filenameObj, m_Sun);
+			Mesh3DReader::read( filenameObj, m_Sun2);
 			
 			// calculate normals
-			if(!m_Sun.hasNormals())
-				m_Sun.calculateVertexNormals();
+			if(!m_Sun4.hasNormals())
+				m_Sun4.calculateVertexNormals();
 			
 			//Exercise 4.2: Scale the sun using the attribute m_sunScale
-            m_Sun.scaleObject(Vector3(m_sunScale, m_sunScale, m_sunScale));
+            m_Sun4.scaleObject(Vector3(m_sunScale, m_sunScale, m_sunScale));
+            m_Sun4.translateObject(Vector3(-m_sunTransX, m_sunTransY, m_sunTransZ));
 			
 			//Exercise 4.4: Set the light position to the center of the sun
             
 			
-			m_showTextureSun = m_Sun.hasUvTextureCoord();
+			m_showTextureSun = m_Sun1.hasUvTextureCoord();
+            m_showTextureSun = m_Sun2.hasUvTextureCoord();
+            m_showTextureSun = m_Sun3.hasUvTextureCoord();
+            m_showTextureSun = m_Sun4.hasUvTextureCoord();
 			break;
-
-		
 		default:
 			break;
 	}
@@ -238,14 +240,9 @@ keyboard(int key, int x, int y)
 			if(!m_Stars.hasUvTextureCoord()) m_showTextureStars = false;
 			
 			m_showTextureSun = !m_showTextureSun;
-			if(!m_Sun.hasUvTextureCoord()) m_showTextureSun = false;
+			if(!m_Sun1.hasUvTextureCoord()) m_showTextureSun = false;
 			
-			m_showTextureEarth = !m_showTextureEarth;
-			if(!m_Earth.hasUvTextureCoord()) m_showTextureEarth = false;
-			
-			m_showTextureMoon = !m_showTextureMoon;
-			if(!m_Moon.hasUvTextureCoord()) m_showTextureMoon = false;
-			break;
+            break;
 		case 'g':
 			m_geocentric = !m_geocentric;
 			break;
@@ -323,7 +320,7 @@ void
 SolarViewer::
 draw_scene(DrawMode _draw_mode)
 {
-	Vector3 sunToEarthVector = m_Earth.origin() - m_Sun.origin();
+	Vector3 sunToEarthVector = m_Earth.origin() - m_Sun1.origin();
 	
 	//Exercise 4.5: Transform the camera so that the earth becomes the center of rotation
 	if(m_geocentric)
@@ -356,11 +353,26 @@ draw_scene(DrawMode _draw_mode)
 	glEnable(GL_DEPTH_TEST);
 	
 	
-	//sun
-	m_meshShaderTexture.setMatrix4x4Uniform("modelworld", m_Sun.getTransformation() );
-	m_Sun.getMaterial(0).m_diffuseTexture.bind();
-	m_meshShaderTexture.setIntUniform("texture", m_Sun.getMaterial(0).m_diffuseTexture.getLayer());
-	draw_object(m_meshShaderTexture, m_Sun);
+	//sun1
+	m_meshShaderTexture.setMatrix4x4Uniform("modelworld", m_Sun1.getTransformation() );
+	m_Sun1.getMaterial(0).m_diffuseTexture.bind();
+	m_meshShaderTexture.setIntUniform("texture", m_Sun1.getMaterial(0).m_diffuseTexture.getLayer());
+	draw_object(m_meshShaderTexture, m_Sun1);
+//    //sun2
+//	m_meshShaderTexture.setMatrix4x4Uniform("modelworld", m_Sun2.getTransformation() );
+//	m_Sun2.getMaterial(1).m_diffuseTexture.bind();
+//	m_meshShaderTexture.setIntUniform("texture", m_Sun2.getMaterial(1).m_diffuseTexture.getLayer());
+//	draw_object(m_meshShaderTexture, m_Sun2);
+//    //sun3
+//	m_meshShaderTexture.setMatrix4x4Uniform("modelworld", m_Sun3.getTransformation() );
+//	m_Sun3.getMaterial(2).m_diffuseTexture.bind();
+//	m_meshShaderTexture.setIntUniform("texture", m_Sun3.getMaterial(2).m_diffuseTexture.getLayer());
+//	draw_object(m_meshShaderTexture, m_Sun3);
+//    //sun4
+//	m_meshShaderTexture.setMatrix4x4Uniform("modelworld", m_Sun4.getTransformation() );
+//	m_Sun4.getMaterial(3).m_diffuseTexture.bind();
+//	m_meshShaderTexture.setIntUniform("texture", m_Sun4.getMaterial(3).m_diffuseTexture.getLayer());
+//	draw_object(m_meshShaderTexture, m_Sun4);
 	
 	m_meshShaderTexture.unbind();
 	
