@@ -156,7 +156,7 @@ load_mesh(const std::string& filenameObj, MeshType type)
 			
 			//Exercise 4.2: Scale the sun using the attribute m_sunScale
             m_Sun.scaleObject(Vector3(m_sunScale, m_sunScale, m_sunScale));
-            m_Sun.translateObject(Vector());
+            m_Sun.translateObject(Vector3(m_sunTransX, m_sunTransY, m_sunTransZ));
 			
 			//Exercise 4.4: Set the light position to the center of the sun
             
