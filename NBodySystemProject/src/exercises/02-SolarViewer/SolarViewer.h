@@ -35,24 +35,31 @@ enum MeshType
 {
 	STARS = 0,
 	SUN1,
-    SUN2,
-    SUN3,
-    SUN4
+//    SUN2,
+//    SUN3,
+//    SUN4
 };
+
+
 
 class SolarViewer : public TrackballViewer
 {
+    
+    
+
 public:
    
 	SolarViewer(const char* _title, int _width, int _height);
   
 	void load_mesh(const std::string& filenameObj, MeshType type);
+    
+    Mesh3D m_Particles[20];
+    int particlesNumber;
+    
+    int cntPlanet;
 	
 	Mesh3D& getStars() {return m_Stars; }
-	Mesh3D& getSun1() {return m_Sun1; }
-	Mesh3D& getSun2() {return m_Sun2; }
-	Mesh3D& getSun3() {return m_Sun3; }
-	Mesh3D& getSun4() {return m_Sun4; }
+	Mesh3D& getSun(int i) {return m_Particles[i]; }
 
 protected:
 
@@ -72,9 +79,6 @@ protected:
 	// mesh objects
 	Mesh3D m_Stars;
 	Mesh3D m_Sun1;
-	Mesh3D m_Sun2;
-	Mesh3D m_Sun3;
-	Mesh3D m_Sun4;
 	Mesh3D m_Earth;
 	Mesh3D m_Moon;
 	Mesh3D m_Planets[8];

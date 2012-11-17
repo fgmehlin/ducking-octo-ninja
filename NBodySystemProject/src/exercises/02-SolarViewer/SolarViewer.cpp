@@ -13,6 +13,9 @@
 
 #include "SolarViewer.h"
 #include "../../utils/Mesh3DReader.h"
+#include <stdlib.h>
+#include <math.h>
+#include <cstdlib>
 
 //== IMPLEMENTATION ========================================================== 
 
@@ -34,6 +37,7 @@ init()
 {
   // initialize parent
   TrackballViewer::init();
+   cntPlanet = 0;
 
   // set camera to look at world coordinate center
   set_scene_pos(Vector3(0.0, 0.0, 0.0), 2.0);
@@ -49,7 +53,7 @@ init()
 	
 	currentTime = 0.0;
 	isWatchOn = false;
-	
+	particlesNumber = 20;
 	daysPerMiliSecond = 1 / 180.0;
 	totalDaysElapsed = 0;
 	m_geocentric = false;
@@ -57,55 +61,23 @@ init()
 	
 	m_moonScale = 50.0;
 	m_earthScale = m_moonScale * 2.0;
-	m_sunScale = m_moonScale * 5.0;
+	m_sunScale = m_moonScale * 3.0;
 	m_starsScale = m_moonScale * 100.0;
-	
+    
+	m_sunTransX =  m_sunScale + 900;
+	m_sunTransY =  m_sunScale + 900;
+	m_sunTransZ =  m_sunScale + 900;
+    
 	m_earthTrans = m_sunScale + 1250;
 	m_moonTrans = m_earthTrans + m_earthScale + 200;
 	
 	m_starsScale = m_moonScale * 100.0;
 	
-	// Mercury
-	m_PlanetsScale[0] = m_earthScale * 1.0;
-	m_PlanetsTranslate[0] = m_earthTrans*0.4*Vector3(drand48()-0.5,0,drand48()-0.5).normalize();
-	m_PlanetsYear[0] = 88.0;
-	
-	// Venus
-	m_PlanetsScale[1] = m_earthScale * 1.0;
-	m_PlanetsTranslate[1] = m_earthTrans*0.7*Vector3(drand48()-0.5,0,drand48()-0.5).normalize();
-	m_PlanetsYear[1] = 224.0;
-	
-	// Mars
-	m_PlanetsScale[2] = m_earthScale * 1.0;
-	m_PlanetsTranslate[2] = m_earthTrans*1.5*Vector3(drand48()-0.5,0,drand48()-0.5).normalize();
-	m_PlanetsYear[2] = 780.0;
-	
-	// Jupiter
-	m_PlanetsScale[3] = m_earthScale * 1.5;
-	m_PlanetsTranslate[3] = m_earthTrans*5.2*0.5*Vector3(drand48()-0.5,0,drand48()-0.5).normalize();
-	m_PlanetsYear[3] = 4330;
-	
-	// Saturn
-	m_PlanetsScale[4] = m_earthScale * 1.0;
-	m_PlanetsTranslate[4] = m_earthTrans*9.5*0.4*Vector3(drand48()-0.5,0,drand48()-0.5).normalize();
-	m_PlanetsYear[4] = 10000;
-	
-	// Uranus
-	m_PlanetsScale[5] = m_earthScale * 1.0;
-	m_PlanetsTranslate[5] = m_earthTrans*19.6*0.25*Vector3(drand48()-0.5,0,drand48()-0.5).normalize();
-	m_PlanetsYear[5] = 30000.0;
-	
-	// Neptune
-	m_PlanetsScale[6] = m_earthScale * 1.0;
-	m_PlanetsTranslate[6] = m_earthTrans*30.0*0.2*Vector3(drand48()-0.5,0,drand48()-0.5).normalize();
-	m_PlanetsYear[6] = 60000.0;
-	
-	// Pluto
-	m_PlanetsScale[7] = m_earthScale * 0.5;
-	m_PlanetsTranslate[7] = m_earthTrans*40.0*0.2*Vector3(drand48()-0.5,0,drand48()-0.5).normalize();
-	m_PlanetsYear[7] = 90600.0;
-	
-	
+//	// Mercury
+//	m_PlanetsScale[0] = m_earthScale * 1.0;
+//	m_PlanetsTranslate[0] = m_earthTrans*0.4*Vector3(drand48()-0.5,0,drand48()-0.5).normalize();
+//	m_PlanetsYear[0] = 88.0;
+		
 }
 
 
@@ -120,7 +92,7 @@ load_mesh(const std::string& filenameObj, MeshType type)
 	Vector3 center;
 	switch(type)
 	{
-        case STARS:
+        {case STARS:
 			// load mesh from obj
 			Mesh3DReader::read( filenameObj, m_Stars);
 			
@@ -141,82 +113,39 @@ load_mesh(const std::string& filenameObj, MeshType type)
 			
 			m_showTextureStars = m_Stars.hasUvTextureCoord();
 			
-			break;
-		case SUN1:
-			// load mesh from obj
-			Mesh3DReader::read( filenameObj, m_Sun1);
-			
-			// calculate normals
-			if(!m_Sun1.hasNormals())
-				m_Sun1.calculateVertexNormals();
-			
-			//Exercise 4.2: Scale the sun using the attribute m_sunScale
-            m_Sun1.scaleObject(Vector3(m_sunScale, m_sunScale, m_sunScale));
-        //    m_Sun1.translateObject(Vector3(m_sunTransX, m_sunTransY, m_sunTransZ));
-			
-			//Exercise 4.4: Set the light position to the center of the sun
+			break;}
+		{case SUN1:
             
-			
-			m_showTextureSun = m_Sun1.hasUvTextureCoord();
-			break;
-        case SUN2:
-			// load mesh from obj
-			Mesh3DReader::read( filenameObj, m_Sun2);
-			
-			// calculate normals
-			if(!m_Sun2.hasNormals())
-				m_Sun2.calculateVertexNormals();
-			
-			//Exercise 4.2: Scale the sun using the attribute m_sunScale
-            m_Sun2.scaleObject(Vector3(m_sunScale, m_sunScale, m_sunScale));
+            // load mesh from obj
+            Mesh3DReader::read( filenameObj, m_Particles[cntPlanet]);
             
-            m_Sun2.translateObject(Vector3(-m_sunTransX, -m_sunTransY, -m_sunTransZ));
-			
-			//Exercise 4.4: Set the light position to the center of the sun
+            // calculate normals
+            if(!m_Particles[cntPlanet].hasNormals())
+                m_Particles[cntPlanet].calculateVertexNormals();
             
-			
-			m_showTextureSun = m_Sun2.hasUvTextureCoord();
-			break;
-        case SUN3:
-			// load mesh from obj
-			Mesh3DReader::read( filenameObj, m_Sun2);
-			
-			// calculate normals
-			if(!m_Sun3.hasNormals())
-				m_Sun3.calculateVertexNormals();
-			
-			//Exercise 4.2: Scale the sun using the attribute m_sunScale
-            m_Sun3.scaleObject(Vector3(m_sunScale, m_sunScale, m_sunScale));
+            //Exercise 4.2: Scale the sun using the attribute m_sunScale
             
-            m_Sun3.translateObject(Vector3(m_sunTransX, -m_sunTransY, -m_sunTransZ));
-			
-			//Exercise 4.4: Set the light position to the center of the sun
+            double r1 = ((double) rand() / (RAND_MAX))-0.5;
+            double r2 = ((double) rand() / (RAND_MAX))-0.5;
+            double r3 = ((double) rand() / (RAND_MAX))-0.5;
             
-			
-			m_showTextureSun = m_Sun3.hasUvTextureCoord();
-			break;
-        case SUN4:
-			// load mesh from obj
-			Mesh3DReader::read( filenameObj, m_Sun2);
-			
-			// calculate normals
-			if(!m_Sun4.hasNormals())
-				m_Sun4.calculateVertexNormals();
-			
-			//Exercise 4.2: Scale the sun using the attribute m_sunScale
-            m_Sun4.scaleObject(Vector3(m_sunScale, m_sunScale, m_sunScale));
-            m_Sun4.translateObject(Vector3(-m_sunTransX, m_sunTransY, m_sunTransZ));
-			
-			//Exercise 4.4: Set the light position to the center of the sun
+            cout<<cntPlanet;
+            cout<< " ";
+            cout<<r1;
+            cout<< " ";
             
-			
-			m_showTextureSun = m_Sun1.hasUvTextureCoord();
-            m_showTextureSun = m_Sun2.hasUvTextureCoord();
-            m_showTextureSun = m_Sun3.hasUvTextureCoord();
-            m_showTextureSun = m_Sun4.hasUvTextureCoord();
-			break;
-		default:
-			break;
+            m_Particles[cntPlanet].translateObject(Vector3(r1*m_sunTransX, r2*m_sunTransY, r3*m_sunTransZ));
+            
+            m_Particles[cntPlanet].scaleObject(Vector3(m_sunScale, m_sunScale, m_sunScale));
+            
+            //Exercise 4.4: Set the light position to the center of the sun
+            
+            
+            m_showTextureSun = m_Particles[cntPlanet].hasUvTextureCoord();
+            cntPlanet++;
+            break;}
+		{default:
+			break;}
 	}
 	
 }
@@ -240,7 +169,10 @@ keyboard(int key, int x, int y)
 			if(!m_Stars.hasUvTextureCoord()) m_showTextureStars = false;
 			
 			m_showTextureSun = !m_showTextureSun;
-			if(!m_Sun1.hasUvTextureCoord()) m_showTextureSun = false;
+            
+            for (int i = 0; i< particlesNumber; i++) {
+                if(!m_Particles[i].hasUvTextureCoord()) m_showTextureSun = false;
+            }
 			
             break;
 		case 'g':
@@ -320,7 +252,7 @@ void
 SolarViewer::
 draw_scene(DrawMode _draw_mode)
 {
-	Vector3 sunToEarthVector = m_Earth.origin() - m_Sun1.origin();
+	Vector3 sunToEarthVector = m_Earth.origin() - m_Particles[0].origin();
 	
 	//Exercise 4.5: Transform the camera so that the earth becomes the center of rotation
 	if(m_geocentric)
@@ -354,25 +286,15 @@ draw_scene(DrawMode _draw_mode)
 	
 	
 	//sun1
-	m_meshShaderTexture.setMatrix4x4Uniform("modelworld", m_Sun1.getTransformation() );
-	m_Sun1.getMaterial(0).m_diffuseTexture.bind();
-	m_meshShaderTexture.setIntUniform("texture", m_Sun1.getMaterial(0).m_diffuseTexture.getLayer());
-	draw_object(m_meshShaderTexture, m_Sun1);
-//    //sun2
-//	m_meshShaderTexture.setMatrix4x4Uniform("modelworld", m_Sun2.getTransformation() );
-//	m_Sun2.getMaterial(1).m_diffuseTexture.bind();
-//	m_meshShaderTexture.setIntUniform("texture", m_Sun2.getMaterial(1).m_diffuseTexture.getLayer());
-//	draw_object(m_meshShaderTexture, m_Sun2);
-//    //sun3
-//	m_meshShaderTexture.setMatrix4x4Uniform("modelworld", m_Sun3.getTransformation() );
-//	m_Sun3.getMaterial(2).m_diffuseTexture.bind();
-//	m_meshShaderTexture.setIntUniform("texture", m_Sun3.getMaterial(2).m_diffuseTexture.getLayer());
-//	draw_object(m_meshShaderTexture, m_Sun3);
-//    //sun4
-//	m_meshShaderTexture.setMatrix4x4Uniform("modelworld", m_Sun4.getTransformation() );
-//	m_Sun4.getMaterial(3).m_diffuseTexture.bind();
-//	m_meshShaderTexture.setIntUniform("texture", m_Sun4.getMaterial(3).m_diffuseTexture.getLayer());
-//	draw_object(m_meshShaderTexture, m_Sun4);
+    
+    
+     for (int i = 0; i< particlesNumber; i++) {
+         m_meshShaderTexture.setMatrix4x4Uniform("modelworld", m_Particles[i].getTransformation() );
+         m_Particles[i].getMaterial(0).m_diffuseTexture.bind();
+         m_meshShaderTexture.setIntUniform("texture", m_Particles[i].getMaterial(0).m_diffuseTexture.getLayer());
+         draw_object(m_meshShaderTexture, m_Particles[i]);
+
+     }
 	
 	m_meshShaderTexture.unbind();
 	
