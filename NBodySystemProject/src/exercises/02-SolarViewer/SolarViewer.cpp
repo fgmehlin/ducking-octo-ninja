@@ -43,7 +43,7 @@ init()
 	m_meshShaderTexture.create("tex.vs","tex.fs");
 	
 	m_showTextureStars = false;
-	m_showTextureSun = true;
+	m_showTextureSun = false;
 	m_showTextureEarth = false;
 	m_showTextureMoon = false;
 	
@@ -57,7 +57,7 @@ init()
 	
 	m_moonScale = 50.0;
 	m_earthScale = m_moonScale * 2.0;
-	m_sunScale = m_moonScale;
+	m_sunScale = m_moonScale * 5.0;
 	m_starsScale = m_moonScale * 100.0;
 	
 	m_earthTrans = m_sunScale + 1250;
@@ -145,11 +145,8 @@ load_mesh(const std::string& filenameObj, MeshType type)
 		case SUN:
 			// load mesh from obj
 			Mesh3DReader::read( filenameObj, m_Sun);
-			Mesh3DReader::read( filenameObj, m_Sun);
-			Mesh3DReader::read( filenameObj, m_Sun);
-			Mesh3DReader::read( filenameObj, m_Sun);
-			Mesh3DReader::read( filenameObj, m_Sun);
-                // calculate normals
+			
+			// calculate normals
 			if(!m_Sun.hasNormals())
 				m_Sun.calculateVertexNormals();
 			
@@ -161,47 +158,47 @@ load_mesh(const std::string& filenameObj, MeshType type)
 			
 			m_showTextureSun = m_Sun.hasUvTextureCoord();
 			break;
-//		case EARTH:
-//			// load mesh from obj
-//			Mesh3DReader::read( filenameObj, m_Earth);
-//			
-//			// calculate normals
-//			if(!m_Earth.hasNormals())
-//				m_Earth.calculateVertexNormals();
-//			
-//			//Exercise 4.2: Scale and translate the earth using the attributes m_earthScale and m_earthTrans
-//			
-//			m_showTextureEarth = m_Earth.hasUvTextureCoord();
-//			break;
-//		case MOON:
-//			// load mesh from obj
-//			Mesh3DReader::read( filenameObj, m_Moon);
-//			
-//			// calculate normals
-//			if(!m_Moon.hasNormals())
-//				m_Moon.calculateVertexNormals();
-//			
-//			//Exercise 4.2: Scale and translate the moon using the attributes m_moonScale and m_moonTrans
-//			
-//			m_showTextureMoon = m_Moon.hasUvTextureCoord();
-//			break;
-//		case MERCURY:
-//		case VENUS:
-//		case MARS:
-//		case JUPITER:
-//		case SATURN:
-//		case URANUS:
-//		case NEPTUNE:
-//		case PLUTO: {
-//			int index = (type-MERCURY);
-//			Mesh3DReader::read( filenameObj, m_Planets[index] );
-//			if(!m_Planets[index].hasNormals())
-//				m_Planets[index].calculateVertexNormals();
-//			
-//			//Optional: Scale and translate the planets
-//			
-//			break;
-//		}
+		case EARTH:
+			// load mesh from obj
+			Mesh3DReader::read( filenameObj, m_Earth);
+			
+			// calculate normals
+			if(!m_Earth.hasNormals())
+				m_Earth.calculateVertexNormals();
+			
+			//Exercise 4.2: Scale and translate the earth using the attributes m_earthScale and m_earthTrans
+			
+			m_showTextureEarth = m_Earth.hasUvTextureCoord();
+			break;
+		case MOON:
+			// load mesh from obj
+			Mesh3DReader::read( filenameObj, m_Moon);
+			
+			// calculate normals
+			if(!m_Moon.hasNormals())
+				m_Moon.calculateVertexNormals();
+			
+			//Exercise 4.2: Scale and translate the moon using the attributes m_moonScale and m_moonTrans
+			
+			m_showTextureMoon = m_Moon.hasUvTextureCoord();
+			break;
+		case MERCURY:
+		case VENUS:
+		case MARS:
+		case JUPITER:
+		case SATURN:
+		case URANUS:
+		case NEPTUNE:
+		case PLUTO: {
+			int index = (type-MERCURY);
+			Mesh3DReader::read( filenameObj, m_Planets[index] );
+			if(!m_Planets[index].hasNormals())
+				m_Planets[index].calculateVertexNormals();
+			
+			//Optional: Scale and translate the planets
+			
+			break;
+		}
 		default:
 			break;
 	}
