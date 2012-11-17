@@ -58,9 +58,13 @@ init()
 	m_moonScale = 50.0;
 	m_earthScale = m_moonScale * 2.0;
 	m_sunScale = m_moonScale * 5.0;
+    
 	m_starsScale = m_moonScale * 100.0;
 	
-	m_earthTrans = m_sunScale + 1250;
+    
+    m_sunTransX = m_sunScale + 1250;
+    m_sunTransY = m_sunScale - 1250;
+    m_sunTransZ = m_sunScale + 2000;
 	m_moonTrans = m_earthTrans + m_earthScale + 200;
 	
 	m_starsScale = m_moonScale * 100.0;
@@ -142,7 +146,24 @@ load_mesh(const std::string& filenameObj, MeshType type)
 			m_showTextureStars = m_Stars.hasUvTextureCoord();
 			
 			break;
-		case SUN:
+		case SUN1:
+			// load mesh from obj
+			Mesh3DReader::read( filenameObj, m_Sun);
+			
+			// calculate normals
+			if(!m_Sun.hasNormals())
+				m_Sun.calculateVertexNormals();
+			
+			//Exercise 4.2: Scale the sun using the attribute m_sunScale
+            m_Sun.scaleObject(Vector3(m_sunScale, m_sunScale, m_sunScale));
+            m_Sun.translateObject(Vector());
+			
+			//Exercise 4.4: Set the light position to the center of the sun
+            
+			
+			m_showTextureSun = m_Sun.hasUvTextureCoord();
+			break;
+        case SUN2:
 			// load mesh from obj
 			Mesh3DReader::read( filenameObj, m_Sun);
 			
@@ -158,47 +179,40 @@ load_mesh(const std::string& filenameObj, MeshType type)
 			
 			m_showTextureSun = m_Sun.hasUvTextureCoord();
 			break;
-		case EARTH:
+        case SUN3:
 			// load mesh from obj
-			Mesh3DReader::read( filenameObj, m_Earth);
+			Mesh3DReader::read( filenameObj, m_Sun);
 			
 			// calculate normals
-			if(!m_Earth.hasNormals())
-				m_Earth.calculateVertexNormals();
+			if(!m_Sun.hasNormals())
+				m_Sun.calculateVertexNormals();
 			
-			//Exercise 4.2: Scale and translate the earth using the attributes m_earthScale and m_earthTrans
+			//Exercise 4.2: Scale the sun using the attribute m_sunScale
+            m_Sun.scaleObject(Vector3(m_sunScale, m_sunScale, m_sunScale));
 			
-			m_showTextureEarth = m_Earth.hasUvTextureCoord();
+			//Exercise 4.4: Set the light position to the center of the sun
+            
+			
+			m_showTextureSun = m_Sun.hasUvTextureCoord();
 			break;
-		case MOON:
+        case SUN4:
 			// load mesh from obj
-			Mesh3DReader::read( filenameObj, m_Moon);
+			Mesh3DReader::read( filenameObj, m_Sun);
 			
 			// calculate normals
-			if(!m_Moon.hasNormals())
-				m_Moon.calculateVertexNormals();
+			if(!m_Sun.hasNormals())
+				m_Sun.calculateVertexNormals();
 			
-			//Exercise 4.2: Scale and translate the moon using the attributes m_moonScale and m_moonTrans
+			//Exercise 4.2: Scale the sun using the attribute m_sunScale
+            m_Sun.scaleObject(Vector3(m_sunScale, m_sunScale, m_sunScale));
 			
-			m_showTextureMoon = m_Moon.hasUvTextureCoord();
+			//Exercise 4.4: Set the light position to the center of the sun
+            
+			
+			m_showTextureSun = m_Sun.hasUvTextureCoord();
 			break;
-		case MERCURY:
-		case VENUS:
-		case MARS:
-		case JUPITER:
-		case SATURN:
-		case URANUS:
-		case NEPTUNE:
-		case PLUTO: {
-			int index = (type-MERCURY);
-			Mesh3DReader::read( filenameObj, m_Planets[index] );
-			if(!m_Planets[index].hasNormals())
-				m_Planets[index].calculateVertexNormals();
-			
-			//Optional: Scale and translate the planets
-			
-			break;
-		}
+
+		
 		default:
 			break;
 	}

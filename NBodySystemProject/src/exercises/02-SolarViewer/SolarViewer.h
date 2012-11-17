@@ -34,17 +34,10 @@
 enum MeshType
 {
 	STARS = 0,
-	SUN,
-	EARTH,
-	MOON,
-	MERCURY,
-	VENUS,
-	MARS,
-	JUPITER,
-	SATURN,
-	URANUS,
-	NEPTUNE,
-	PLUTO
+	SUN1,
+    SUN2,
+    SUN3,
+    SUN4
 };
 
 class SolarViewer : public TrackballViewer
@@ -106,6 +99,9 @@ protected:
 	float m_moonScale;
 	float m_earthScale;
 	float m_sunScale;
+	float m_sunTransX;
+	float m_sunTransY;
+	float m_sunTransZ;
 	float m_starsScale;
 	
 	//translation factors
