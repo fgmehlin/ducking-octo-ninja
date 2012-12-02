@@ -62,10 +62,6 @@
             argument = "../../../data/stars/stars.obj"
             isEnabled = "YES">
          </CommandLineArgument>
-         <CommandLineArgument
-            argument = "../../../data/sun/sun.obj"
-            isEnabled = "YES">
-         </CommandLineArgument>
       </CommandLineArguments>
       <AdditionalOptions>
       </AdditionalOptions>

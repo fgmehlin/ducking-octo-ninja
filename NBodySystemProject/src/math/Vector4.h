@@ -80,7 +80,7 @@ public:
 			case 2: return z;
 			case 3: return w;
 		}
-	}
+	} 
 
 	double dot(const Vector4 &v) const {
 		return x*v.x + y*v.y + z*v.z + w*v.w;

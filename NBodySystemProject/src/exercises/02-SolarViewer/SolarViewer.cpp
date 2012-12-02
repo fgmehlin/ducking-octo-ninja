@@ -13,9 +13,6 @@
 
 #include "SolarViewer.h"
 #include "../../utils/Mesh3DReader.h"
-#include <stdlib.h>
-#include <math.h>
-#include <cstdlib>
 
 //== IMPLEMENTATION ========================================================== 
 
@@ -37,7 +34,6 @@ init()
 {
   // initialize parent
   TrackballViewer::init();
-   cntPlanet = 0;
 
   // set camera to look at world coordinate center
   set_scene_pos(Vector3(0.0, 0.0, 0.0), 2.0);
@@ -53,7 +49,7 @@ init()
 	
 	currentTime = 0.0;
 	isWatchOn = false;
-	particlesNumber = 20;
+	
 	daysPerMiliSecond = 1 / 180.0;
 	totalDaysElapsed = 0;
 	m_geocentric = false;
@@ -61,23 +57,14 @@ init()
 	
 	m_moonScale = 50.0;
 	m_earthScale = m_moonScale * 2.0;
-	m_sunScale = m_moonScale * 3.0;
+	m_sunScale = m_moonScale * 5.0;
 	m_starsScale = m_moonScale * 100.0;
-    
-	m_sunTransX =  m_sunScale + 900;
-	m_sunTransY =  m_sunScale + 900;
-	m_sunTransZ =  m_sunScale + 900;
-    
+	
 	m_earthTrans = m_sunScale + 1250;
 	m_moonTrans = m_earthTrans + m_earthScale + 200;
 	
-	m_starsScale = m_moonScale * 100.0;
+
 	
-//	// Mercury
-//	m_PlanetsScale[0] = m_earthScale * 1.0;
-//	m_PlanetsTranslate[0] = m_earthTrans*0.4*Vector3(drand48()-0.5,0,drand48()-0.5).normalize();
-//	m_PlanetsYear[0] = 88.0;
-		
 }
 
 
@@ -92,7 +79,7 @@ load_mesh(const std::string& filenameObj, MeshType type)
 	Vector3 center;
 	switch(type)
 	{
-        {case STARS:
+		case STARS:
 			// load mesh from obj
 			Mesh3DReader::read( filenameObj, m_Stars);
 			
@@ -113,39 +100,9 @@ load_mesh(const std::string& filenameObj, MeshType type)
 			
 			m_showTextureStars = m_Stars.hasUvTextureCoord();
 			
-			break;}
-		{case SUN1:
-            
-            // load mesh from obj
-            Mesh3DReader::read( filenameObj, m_Particles[cntPlanet]);
-            
-            // calculate normals
-            if(!m_Particles[cntPlanet].hasNormals())
-                m_Particles[cntPlanet].calculateVertexNormals();
-            
-            //Exercise 4.2: Scale the sun using the attribute m_sunScale
-            
-            double r1 = ((double) rand() / (RAND_MAX))-0.5;
-            double r2 = ((double) rand() / (RAND_MAX))-0.5;
-            double r3 = ((double) rand() / (RAND_MAX))-0.5;
-            
-            cout<<cntPlanet;
-            cout<< " ";
-            cout<<r1;
-            cout<< " ";
-            
-            m_Particles[cntPlanet].translateObject(Vector3(r1*m_sunTransX, r2*m_sunTransY, r3*m_sunTransZ));
-            
-            m_Particles[cntPlanet].scaleObject(Vector3(m_sunScale, m_sunScale, m_sunScale));
-            
-            //Exercise 4.4: Set the light position to the center of the sun
-            
-            
-            m_showTextureSun = m_Particles[cntPlanet].hasUvTextureCoord();
-            cntPlanet++;
-            break;}
-		{default:
-			break;}
+			break;
+				default:
+			break;
 	}
 	
 }
@@ -167,13 +124,6 @@ keyboard(int key, int x, int y)
 		case 't':
 			m_showTextureStars = !m_showTextureStars;
 			if(!m_Stars.hasUvTextureCoord()) m_showTextureStars = false;
-			
-			m_showTextureSun = !m_showTextureSun;
-            
-            for (int i = 0; i< particlesNumber; i++) {
-                if(!m_Particles[i].hasUvTextureCoord()) m_showTextureSun = false;
-            }
-			
             break;
 		case 'g':
 			m_geocentric = !m_geocentric;
@@ -252,8 +202,6 @@ void
 SolarViewer::
 draw_scene(DrawMode _draw_mode)
 {
-	Vector3 sunToEarthVector = m_Earth.origin() - m_Particles[0].origin();
-	
 	//Exercise 4.5: Transform the camera so that the earth becomes the center of rotation
 	if(m_geocentric)
 	{
@@ -284,20 +232,7 @@ draw_scene(DrawMode _draw_mode)
 	draw_object(m_meshShaderTexture, m_Stars);
 	glEnable(GL_DEPTH_TEST);
 	
-	
-	//sun1
-    
-    
-     for (int i = 0; i< particlesNumber; i++) {
-         m_meshShaderTexture.setMatrix4x4Uniform("modelworld", m_Particles[i].getTransformation() );
-         m_Particles[i].getMaterial(0).m_diffuseTexture.bind();
-         m_meshShaderTexture.setIntUniform("texture", m_Particles[i].getMaterial(0).m_diffuseTexture.getLayer());
-         draw_object(m_meshShaderTexture, m_Particles[i]);
-
-     }
-	
-	m_meshShaderTexture.unbind();
-	
+		
 	//-------------------------------
 	
 	m_meshShaderDiffuse.bind();
@@ -319,22 +254,6 @@ draw_scene(DrawMode _draw_mode)
 	//calculate the light position and intensity from the earth to the moon
 	float earthLightIntensity = 0.0;
 	Vector3 earthLightPosInCamera(0.0, 0.0, 0.0);
-	
-	m_meshShaderDiffuse.setVector3Uniform("indirectlightcolor", moonLightIntensity, moonLightIntensity, moonLightIntensity);
-	m_meshShaderDiffuse.setVector3Uniform("indirectlightposition", moonLightPosInCamera.x, moonLightPosInCamera.y, moonLightPosInCamera.z);
-	
-	//earth
-	m_meshShaderDiffuse.setMatrix4x4Uniform("modelworld", m_Earth.getTransformation() );
-	m_meshShaderDiffuse.setMatrix3x3Uniform("modelworldNormal", m_Earth.getTransformation().Inverse().Transpose());
-	draw_object(m_meshShaderDiffuse, m_Earth, m_showTextureEarth);
-
-	m_meshShaderDiffuse.setVector3Uniform("indirectlightcolor", earthLightIntensity, earthLightIntensity, earthLightIntensity);
-	m_meshShaderDiffuse.setVector3Uniform("indirectlightposition", earthLightPosInCamera.x, earthLightPosInCamera.y, earthLightPosInCamera.z);
-	
-	//moon
-	m_meshShaderDiffuse.setMatrix4x4Uniform("modelworld", m_Moon.getTransformation() );
-	m_meshShaderDiffuse.setMatrix3x3Uniform("modelworldNormal", m_Moon.getTransformation().Inverse().Transpose());
-	draw_object(m_meshShaderDiffuse, m_Moon, m_showTextureMoon);
 	
 	//Optional: Draw the planets
 	
