@@ -38,15 +38,7 @@ public:
     
     
     
-    typedef struct {
-        Vector3 position;
-        Vector3 speed;
-        Vector3 acceleration;
-        
-        
-    } Particle;
-    
-    Particle *particle;
+
     
     
     
