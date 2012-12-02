@@ -35,6 +35,21 @@ class Object3D
 public:
     //------------------------------------------------ public methods
 
+    
+    
+    
+    typedef struct {
+        Vector3 position;
+        Vector3 speed;
+        Vector3 acceleration;
+        
+        
+    } Particle;
+    
+    Particle *particle;
+    
+    
+    
 	//! constructor which sets the object to world transformation to identity
 	Object3D()
     {
