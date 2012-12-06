@@ -34,18 +34,17 @@
 enum MeshType
 {
 	STARS = 0,
-	SUN,
-	EARTH,
-	MOON,
-	MERCURY,
-	VENUS,
-	MARS,
-	JUPITER,
-	SATURN,
-	URANUS,
-	NEPTUNE,
-	PLUTO
 };
+
+typedef struct {
+    Vector3 position;
+    Vector3 speed;
+    Vector3 acceleration;
+    
+    
+} Particle;
+
+
 
 class SolarViewer : public TrackballViewer
 {
@@ -56,10 +55,6 @@ public:
 	void load_mesh(const std::string& filenameObj, MeshType type);
 	
 	Mesh3D& getStars() {return m_Stars; }
-	Mesh3D& getEarth() {return m_Earth; }
-	Mesh3D& getMoon() {return m_Moon; }
-	Mesh3D& getSun() {return m_Sun; }
-	Mesh3D& getPlanet(int i) { return m_Planets[i]; }
 
 protected:
 
@@ -82,6 +77,8 @@ protected:
 	Mesh3D m_Earth;
 	Mesh3D m_Moon;
 	Mesh3D m_Planets[8];
+    
+    Particle *particle;
 	
 	float m_PlanetsScale[8];
 	Vector3 m_PlanetsTranslate[8];
