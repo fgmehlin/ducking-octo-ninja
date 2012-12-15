@@ -22,13 +22,15 @@ int main(int argc, char **argv)
 	}
 	if(argc > 2)
 	{
-        for(int i = 0; i < 20; i++){
+//        for(int i = 0; i < 20; i++){
             window.load_mesh(argv[2], SUN1);
-        }
+        
+//        }
 //		window.load_mesh(argv[2], SUN2);
 //		window.load_mesh(argv[2], SUN3);
 //		window.load_mesh(argv[2], SUN4);
     }
+    
 		
 	glutMainLoop();
 }

@@ -53,13 +53,11 @@ public:
   
 	void load_mesh(const std::string& filenameObj, MeshType type);
     
-    Mesh3D m_Particles[20];
-    int particlesNumber;
+    int particlesNumber = 10;
     
     int cntPlanet;
 	
 	Mesh3D& getStars() {return m_Stars; }
-	Mesh3D& getSun(int i) {return m_Particles[i]; }
 
 protected:
 
@@ -67,25 +65,33 @@ protected:
 	virtual void init();
 	virtual void keyboard(int key, int x, int y);
 	virtual void special(int key, int x, int y);
+public:
 	virtual void idle();
+protected:
+    Mesh3D *createCube();
 	
 	virtual void draw_scene(DrawMode _draw_mode);
+    void draw_cube(Mesh3D *mesh);
 
     void draw_object(Shader& sh, Mesh3D& mesh);
 	void draw_object(Shader& sh, Mesh3D& mesh, bool showTexture);
+    
+    float RandomFloat(float a, float b);    
+    Vector3 calculateForces(Mesh3D* p);
+    Vector3 calculateVertexDistance(Vector3 a, Vector3 b);
+    
+public:
+    void move(float timeElapsed);
 
 protected:
 	
 	// mesh objects
 	Mesh3D m_Stars;
-	Mesh3D m_Sun1;
-	Mesh3D m_Earth;
-	Mesh3D m_Moon;
-	Mesh3D m_Planets[8];
+    std::vector< Mesh3D* > m_meshes;
 	
-	float m_PlanetsScale[8];
-	Vector3 m_PlanetsTranslate[8];
-	float m_PlanetsYear[8];
+//	float m_PlanetsScale[8];
+//	Vector3 m_PlanetsTranslate[8];
+//	float m_PlanetsYear[8];
 	
 	// directional light
 	Light3D m_light;
@@ -95,6 +101,7 @@ protected:
 	Shader m_meshShaderDiffuse;
 	Shader m_meshShaderPhong;
 	Shader m_meshShaderTexture;
+    Shader m_cubeShader;
 	
 	bool m_showTextureStars;
 	bool m_showTextureSun;
@@ -122,7 +129,25 @@ protected:
 	float daysPerMiliSecond;
 	float totalDaysElapsed;
 	float currentTime;
+    
+   
+	
+//protected:
+//    
+//	// overloaded GUI function
+//    virtual void init();
+//    virtual void keyboard(int key, int x, int y);
+//    virtual void special(int key, int x, int y);
+//    
+//    virtual void draw_scene(DrawMode _draw_mode);
+    
+    
+	
+
+	
+	
 };
+
 
 
 //=============================================================================

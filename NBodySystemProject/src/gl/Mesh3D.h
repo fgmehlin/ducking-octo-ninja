@@ -42,6 +42,8 @@ public:
     double m_specularExp;
     Texture m_diffuseTexture;
     Texture m_bumpTexture;
+    
+    
 };
 
 class Mesh3D : public Object3D
@@ -85,6 +87,22 @@ public:
 	void setVertexUV(const vector<Vector2>& _uvCoord)
     {
         m_vertexUV = _uvCoord;
+    }
+    
+    void setID(int _ID){
+        ID = _ID;
+    }
+    
+    void setSpeed(Vector3 _speed){
+        speed = _speed;
+    }
+    
+    void setMass(double _m){
+        m = _m;
+    }
+    
+    void setCurrentPosition(Vector3 pos){
+        currentPosition = pos;
     }
     
     // ---------------------------------------------------------------------------------
@@ -198,6 +216,22 @@ public:
     {
         return m_materials;
     }
+    
+    int getID(){
+        return ID;
+    }
+    
+    Vector3 getSpeed(){
+        return  speed;
+    }
+    
+    double getMass(){
+        return m;
+    }
+    
+    Vector3 getCurrentPosition(){
+        return currentPosition;
+    }
 	
     // ---------------------------------------------------------------------------------
     
@@ -280,6 +314,11 @@ private:
 
 	//!Material of this mesh
 	vector<MeshMaterial *> m_materials;
+    
+    Vector3 speed;
+    double m;
+    int ID;
+    Vector3 currentPosition;
 						 
 };
 

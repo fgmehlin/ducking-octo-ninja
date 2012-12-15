@@ -141,8 +141,8 @@
 				7DAF52AD12705D68002B243A /* phong.vs */,
 				7DAF52AC12705D68002B243A /* phong.fs */,
 				7DAF52AB12705D68002B243A /* main.cpp */,
-				FF5DE9A412718AC300C0C693 /* tex.fs */,
 				FF5DE9A512718ADF00C0C693 /* tex.vs */,
+				FF5DE9A412718AC300C0C693 /* tex.fs */,
 			);
 			name = "02-SolarViewer";
 			sourceTree = "<group>";

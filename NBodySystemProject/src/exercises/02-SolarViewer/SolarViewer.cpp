@@ -18,6 +18,10 @@
 #include <cstdlib>
 
 //== IMPLEMENTATION ========================================================== 
+#define GRAVITY 6.673*pow(10, -11)
+#define NUMBER_PARTICLES 2000
+#define RANGE 1200
+#define SPEED 5
 
 
 SolarViewer::
@@ -38,6 +42,7 @@ init()
   // initialize parent
   TrackballViewer::init();
    cntPlanet = 0;
+    
 
   // set camera to look at world coordinate center
   set_scene_pos(Vector3(0.0, 0.0, 0.0), 2.0);
@@ -53,15 +58,14 @@ init()
 	
 	currentTime = 0.0;
 	isWatchOn = false;
-	particlesNumber = 20;
+	particlesNumber = 30;
 	daysPerMiliSecond = 1 / 180.0;
 	totalDaysElapsed = 0;
 	m_geocentric = false;
 	m_recSunlightInt = 1.0;
 	
-	m_moonScale = 50.0;
-	m_earthScale = m_moonScale * 2.0;
-	m_sunScale = m_moonScale * 3.0;
+	m_moonScale = 10.0;
+
 	m_starsScale = m_moonScale * 100.0;
     
 	m_sunTransX =  m_sunScale + 900;
@@ -72,11 +76,46 @@ init()
 	m_moonTrans = m_earthTrans + m_earthScale + 200;
 	
 	m_starsScale = m_moonScale * 100.0;
+    
+	// initialize parent
+    TrackballViewer::init();
+    
+	// create uniform cube
+    for (int i = 0; i < NUMBER_PARTICLES; i++) {
+        m_meshes.push_back(createCube());
+    }
+    m_meshes.push_back(createCube());
+    m_meshes[NUMBER_PARTICLES]->setCurrentPosition(Vector3 (0.0, 0.0, 0.0));
+    m_meshes[NUMBER_PARTICLES]->setSpeed(0.0);
+    m_meshes[NUMBER_PARTICLES]->setMass(100000000.0);
+    m_meshes[NUMBER_PARTICLES]->scaleObject( Vector3(20,20,20) );
+    m_meshes[NUMBER_PARTICLES]->setID(NUMBER_PARTICLES);
 	
-//	// Mercury
-//	m_PlanetsScale[0] = m_earthScale * 1.0;
-//	m_PlanetsTranslate[0] = m_earthTrans*0.4*Vector3(drand48()-0.5,0,drand48()-0.5).normalize();
-//	m_PlanetsYear[0] = 88.0;
+    for (int i = 0; i < NUMBER_PARTICLES; i++) {
+        // move cube to (0,0,1)
+        float x = RandomFloat(-RANGE, RANGE);
+        float y = RandomFloat(-RANGE, RANGE);
+        float z = RandomFloat(-RANGE, RANGE);
+        
+        m_meshes[i]->setCurrentPosition(Vector3(x ,y ,z));
+        std::cout<<"x: "<<m_meshes[i]->getCurrentPosition().x<<" y: "<<m_meshes[i]->getCurrentPosition().y<<" z: "<<m_meshes[i]->getCurrentPosition().z<<std::endl;
+        m_meshes[i]->scaleObject( Vector3(8,8,8) );
+        m_meshes[i]->translateWorld(m_meshes[i]->getCurrentPosition());
+        m_meshes[i]->setID(i);
+        m_meshes[i]->setMass(10.0);
+        float speedX = RandomFloat(-SPEED, SPEED);
+        float speedY = RandomFloat(-SPEED, SPEED);
+        float speedZ = RandomFloat(-SPEED, SPEED);
+        m_meshes[i]->setSpeed(Vector3(speedX, speedY, speedZ));
+        std::cout<<"x: "<<m_meshes[i]->getSpeed().x<<" y: "<<m_meshes[i]->getSpeed().y<<" z: "<<m_meshes[i]->getSpeed().z<<std::endl;
+        
+    }
+    
+	// set camera to look at world coordinate center
+    set_scene_pos(Vector3(0.0, 0.0, 0.0), 2.0);
+	
+	// load cube shader
+	m_cubeShader.create("cube.vs", "cube.fs");
 		
 }
 
@@ -114,40 +153,123 @@ load_mesh(const std::string& filenameObj, MeshType type)
 			m_showTextureStars = m_Stars.hasUvTextureCoord();
 			
 			break;}
-		{case SUN1:
-            
-            // load mesh from obj
-            Mesh3DReader::read( filenameObj, m_Particles[cntPlanet]);
-            
-            // calculate normals
-            if(!m_Particles[cntPlanet].hasNormals())
-                m_Particles[cntPlanet].calculateVertexNormals();
-            
-            //Exercise 4.2: Scale the sun using the attribute m_sunScale
-            
-            double r1 = ((double) rand() / (RAND_MAX))-0.5;
-            double r2 = ((double) rand() / (RAND_MAX))-0.5;
-            double r3 = ((double) rand() / (RAND_MAX))-0.5;
-            
-            cout<<cntPlanet;
-            cout<< " ";
-            cout<<r1;
-            cout<< " ";
-            
-            m_Particles[cntPlanet].translateObject(Vector3(r1*m_sunTransX, r2*m_sunTransY, r3*m_sunTransZ));
-            
-            m_Particles[cntPlanet].scaleObject(Vector3(m_sunScale, m_sunScale, m_sunScale));
-            
-            //Exercise 4.4: Set the light position to the center of the sun
-            
-            
-            m_showTextureSun = m_Particles[cntPlanet].hasUvTextureCoord();
-            cntPlanet++;
-            break;}
 		{default:
 			break;}
 	}
 	
+}
+
+Mesh3D* 
+SolarViewer::
+createCube()
+{
+    // initialize Mesh3D
+    Mesh3D *cube = new Mesh3D();
+    
+	// setup uniform cube with side length 0.5 and center of cube being (0,0,0)
+	std::vector< Vector3 > cubeVertices;
+	std::vector< Vector3 > cubeNormals;
+	std::vector< Vector3 > cubeColors;
+	std::vector< unsigned int > cubeIndices;
+	float d = 1.0;
+    
+	
+	// front
+	cubeVertices.push_back(Vector3(-d,-d, d));
+	cubeVertices.push_back(Vector3( d,-d, d));
+	cubeVertices.push_back(Vector3( d, d, d));
+	cubeVertices.push_back(Vector3(-d, d, d));
+	for(int k = 0; k < 4; k++) cubeNormals.push_back(Vector3(0,0,1));
+	for(int k = 0; k < 4; k++) cubeColors.push_back(Vector3(0.8,0.3,0.3));
+	cubeIndices.push_back(0);
+	cubeIndices.push_back(1);
+	cubeIndices.push_back(2);
+	cubeIndices.push_back(0);
+	cubeIndices.push_back(2);
+	cubeIndices.push_back(3);
+	
+	
+	// right
+	cubeVertices.push_back(Vector3( d,-d,-d));
+	cubeVertices.push_back(Vector3( d,-d, d));
+	cubeVertices.push_back(Vector3( d, d, d));
+	cubeVertices.push_back(Vector3( d, d,-d));
+	for(int k = 0; k < 4; k++) cubeNormals.push_back(Vector3(1,0,0));
+	for(int k = 0; k < 4; k++) cubeColors.push_back(Vector3(0.3,0.8,0.3));
+	cubeIndices.push_back(4);
+	cubeIndices.push_back(5);
+	cubeIndices.push_back(6);
+	cubeIndices.push_back(4);
+	cubeIndices.push_back(6);
+	cubeIndices.push_back(7);
+	
+	
+	// back
+	cubeVertices.push_back(Vector3( d,-d,-d));
+	cubeVertices.push_back(Vector3(-d,-d,-d));
+	cubeVertices.push_back(Vector3(-d, d,-d));
+	cubeVertices.push_back(Vector3( d, d,-d));
+	for(int k = 0; k < 4; k++) cubeNormals.push_back(Vector3(0,0,-1));
+	for(int k = 0; k < 4; k++) cubeColors.push_back(Vector3(0.3,0.3,0.8));
+	cubeIndices.push_back(8);
+	cubeIndices.push_back(9);
+	cubeIndices.push_back(10);
+	cubeIndices.push_back(8);
+	cubeIndices.push_back(10);
+	cubeIndices.push_back(11);
+	
+    
+	// left
+	cubeVertices.push_back(Vector3(-d,-d, d));
+	cubeVertices.push_back(Vector3(-d,-d,-d));
+	cubeVertices.push_back(Vector3(-d, d,-d));
+	cubeVertices.push_back(Vector3(-d, d, d));
+	for(int k = 0; k < 4; k++) cubeNormals.push_back(Vector3(-1,0,0));
+	for(int k = 0; k < 4; k++) cubeColors.push_back(Vector3(0.8,0.8,0.3));
+	cubeIndices.push_back(12);
+	cubeIndices.push_back(13);
+	cubeIndices.push_back(14);
+	cubeIndices.push_back(12);
+	cubeIndices.push_back(14);
+	cubeIndices.push_back(15);
+	
+    
+	// top
+	cubeVertices.push_back(Vector3(-d, d,-d));
+	cubeVertices.push_back(Vector3( d, d,-d));
+	cubeVertices.push_back(Vector3( d, d, d));
+	cubeVertices.push_back(Vector3(-d, d, d));
+	for(int k = 0; k < 4; k++) cubeNormals.push_back(Vector3(0,1,0));
+	for(int k = 0; k < 4; k++) cubeColors.push_back(Vector3(0.8,0.3,0.8));
+	cubeIndices.push_back(16);
+	cubeIndices.push_back(17);
+	cubeIndices.push_back(18);
+	cubeIndices.push_back(16);
+	cubeIndices.push_back(18);
+	cubeIndices.push_back(19);
+	
+    
+	// bottom
+	cubeVertices.push_back(Vector3( d,-d,-d));
+	cubeVertices.push_back(Vector3(-d,-d,-d));
+	cubeVertices.push_back(Vector3(-d,-d, d));
+	cubeVertices.push_back(Vector3( d,-d, d));
+	for(int k = 0; k < 4; k++) cubeNormals.push_back(Vector3(0,-1,0));
+	for(int k = 0; k < 4; k++) cubeColors.push_back(Vector3(0.3,0.8,0.8));
+	cubeIndices.push_back(20);
+	cubeIndices.push_back(21);
+	cubeIndices.push_back(22);
+	cubeIndices.push_back(20);
+	cubeIndices.push_back(22);
+	cubeIndices.push_back(23);
+	
+	
+	cube->setIndices(cubeIndices);
+	cube->setVertexPositions(cubeVertices);
+	cube->setVertexNormals(cubeNormals);
+	cube->setVertexColors(cubeColors);
+    
+    return cube;
 }
 
 //-------------------------------------------------------------------------------
@@ -170,9 +292,9 @@ keyboard(int key, int x, int y)
 			
 			m_showTextureSun = !m_showTextureSun;
             
-            for (int i = 0; i< particlesNumber; i++) {
-                if(!m_Particles[i].hasUvTextureCoord()) m_showTextureSun = false;
-            }
+            
+//                if(!m_particle.hasUvTextureCoord()) m_showTextureSun = false;
+            
 			
             break;
 		case 'g':
@@ -235,12 +357,19 @@ void SolarViewer::idle()
 	{
 		float prevTime = currentTime;
 		currentTime = watch.stop();
+        float timeElapsed = currentTime - prevTime;
+        std::cout<<"timeElapsed: "<<timeElapsed<<std::endl;
 		float daysElapsed = daysPerMiliSecond * (currentTime-prevTime);
 		totalDaysElapsed += daysElapsed;
 		
 		//Exercise 4.3 Rotate the earth and the moon
 		
 		//Optional: Rotate the planets
+        
+        move(timeElapsed/1000);
+        for (int i = 0; i < NUMBER_PARTICLES; i++) {
+           m_meshes[i]->translateWorld(m_meshes[i]->getCurrentPosition());
+        }
 		
 		glutPostRedisplay();
 	}
@@ -252,13 +381,7 @@ void
 SolarViewer::
 draw_scene(DrawMode _draw_mode)
 {
-	Vector3 sunToEarthVector = m_Earth.origin() - m_Particles[0].origin();
-	
-	//Exercise 4.5: Transform the camera so that the earth becomes the center of rotation
-	if(m_geocentric)
-	{
-			
-	}
+
 	
 	// clear screen
 	glEnable(GL_DEPTH_TEST);
@@ -284,20 +407,54 @@ draw_scene(DrawMode _draw_mode)
 	draw_object(m_meshShaderTexture, m_Stars);
 	glEnable(GL_DEPTH_TEST);
 	
-	
-	//sun1
-    
-    
-     for (int i = 0; i< particlesNumber; i++) {
-         m_meshShaderTexture.setMatrix4x4Uniform("modelworld", m_Particles[i].getTransformation() );
-         m_Particles[i].getMaterial(0).m_diffuseTexture.bind();
-         m_meshShaderTexture.setIntUniform("texture", m_Particles[i].getMaterial(0).m_diffuseTexture.getLayer());
-         draw_object(m_meshShaderTexture, m_Particles[i]);
-
-     }
-	
 	m_meshShaderTexture.unbind();
+    
+    ////////////////////////////////////////////particles//////////////////////////////////////////
 	
+    // first bind the shader
+	m_cubeShader.bind(); 
+	
+	// set parameters to send to the shader
+	m_cubeShader.setMatrix4x4Uniform("WorldCameraTransform", m_camera.getTransformation().Inverse());
+	m_cubeShader.setMatrix3x3Uniform("WorldCameraNormalTransform", m_camera.getTransformation().Transpose());
+	m_cubeShader.setMatrix4x4Uniform("ProjectionMatrix", m_camera.getProjectionMatrix());
+    
+    for (std::vector<Mesh3D*>::iterator mIt = m_meshes.begin(); mIt != m_meshes.end(); ++mIt)
+    {
+        Mesh3D *cube = *mIt;
+        
+        // besides during we can apply transformations just before rendering:
+        // save the original transformation of the cube
+        Matrix4 originalTransformation = cube->getTransformation();
+        
+        // rotate the cube before rendering
+        cube->rotateObject(Vector3(0,1,0), M_PI/4);
+        
+        // send the model parameters to the shader
+        m_cubeShader.setMatrix4x4Uniform("ModelWorldTransform", cube->getTransformation() );
+        m_cubeShader.setMatrix3x3Uniform("ModelWorldNormalTransform", cube->getTransformation().Inverse().Transpose());
+        
+        // render the cube
+        draw_cube(cube);
+        
+        // ((( Exercise 3.6 )))
+        
+        // then reset the original transformation
+        cube->setTransformation( originalTransformation );
+    }
+	
+    // for illustration render a small sphere at the world center
+	Matrix4 ident;
+	ident.loadIdentity();
+	m_cubeShader.setMatrix4x4Uniform("ModelWorldTransform", ident );
+	m_cubeShader.setMatrix3x3Uniform("ModelWorldNormalTransform", ident );
+	
+	glColor3f(1.0,1.0,1.0); // set sphere color to white
+	glutSolidSphere( 0.05, 10, 10 );
+	
+	// finally, unbind the shader
+	m_cubeShader.unbind();
+	////////////////////////////////////////////////////////////////////////////////////////////////
 	//-------------------------------
 	
 	m_meshShaderDiffuse.bind();
@@ -310,41 +467,36 @@ draw_scene(DrawMode _draw_mode)
 	m_meshShaderDiffuse.setMatrix3x3Uniform("worldcameraNormal", m_camera.getTransformation().Transpose());
 	m_meshShaderDiffuse.setVector3Uniform("lightposition", lightPosInCamera.x, lightPosInCamera.y, lightPosInCamera.z );
 	m_meshShaderDiffuse.setVector3Uniform("lightcolor", m_recSunlightInt, m_recSunlightInt, m_recSunlightInt);
-	
-	//Exercise 4.4: Setup the indirect lighting
-	//calculate the light position and intensity from the moon to the earth
-	float moonLightIntensity = 0.0;
-	Vector3 moonLightPosInCamera(0.0, 0.0, 0.0);
-	
-	//calculate the light position and intensity from the earth to the moon
-	float earthLightIntensity = 0.0;
-	Vector3 earthLightPosInCamera(0.0, 0.0, 0.0);
-	
-	m_meshShaderDiffuse.setVector3Uniform("indirectlightcolor", moonLightIntensity, moonLightIntensity, moonLightIntensity);
-	m_meshShaderDiffuse.setVector3Uniform("indirectlightposition", moonLightPosInCamera.x, moonLightPosInCamera.y, moonLightPosInCamera.z);
-	
-	//earth
-	m_meshShaderDiffuse.setMatrix4x4Uniform("modelworld", m_Earth.getTransformation() );
-	m_meshShaderDiffuse.setMatrix3x3Uniform("modelworldNormal", m_Earth.getTransformation().Inverse().Transpose());
-	draw_object(m_meshShaderDiffuse, m_Earth, m_showTextureEarth);
 
-	m_meshShaderDiffuse.setVector3Uniform("indirectlightcolor", earthLightIntensity, earthLightIntensity, earthLightIntensity);
-	m_meshShaderDiffuse.setVector3Uniform("indirectlightposition", earthLightPosInCamera.x, earthLightPosInCamera.y, earthLightPosInCamera.z);
 	
-	//moon
-	m_meshShaderDiffuse.setMatrix4x4Uniform("modelworld", m_Moon.getTransformation() );
-	m_meshShaderDiffuse.setMatrix3x3Uniform("modelworldNormal", m_Moon.getTransformation().Inverse().Transpose());
-	draw_object(m_meshShaderDiffuse, m_Moon, m_showTextureMoon);
+	
+	
+	
 	
 	//Optional: Draw the planets
 	
 	m_meshShaderDiffuse.unbind();
+    
 
-	//Exercise 4.5: Transform the camera back to its original position
-	if(m_geocentric) 
-	{
-		
-	}
+}
+
+void
+SolarViewer::
+draw_cube(Mesh3D *mesh)
+{	
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	
+	glVertexPointer( 3, GL_DOUBLE, 0, mesh->getVertexPointer() );
+	glNormalPointer( GL_DOUBLE, 0, mesh->getNormalPointer() );
+	glColorPointer( 3, GL_DOUBLE, 0, mesh->getColorPointer() );
+	
+	glDrawElements( GL_TRIANGLES, mesh->getNumberOfFaces()*3, GL_UNSIGNED_INT, mesh->getVertexIndicesPointer() );
+	
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 
@@ -412,6 +564,74 @@ void SolarViewer::draw_object(Shader& sh, Mesh3D& mesh, bool showTexture)
 	if(showTexture)
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	
+}
+
+float SolarViewer::RandomFloat(float a, float b) {
+    float random = ((float) rand()) / (float) RAND_MAX;
+    float diff = b - a;
+    float r = random * diff;
+    return a + r;
+}
+
+Vector3 SolarViewer::calculateForces(Mesh3D* p){
+    Vector3 force = (0.0f, 0.0f, 0.0f);
+    for(int i = 0; i < NUMBER_PARTICLES + 1; i++){
+        if(m_meshes[i]->getID() != p->getID()){
+            
+            
+                
+            Vector3 distanceVertex = calculateVertexDistance(p->getCurrentPosition(), m_meshes[i]->getCurrentPosition());
+            
+            float norme = pow(pow(distanceVertex.x, 2) + pow(distanceVertex.y,2) + pow(distanceVertex.z,2), 1/2);
+            
+            force += -(m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(norme, 2)*distanceVertex.normalize();
+            
+//            force.y += (m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(distance(m_meshes[i]->getCurrentPosition().y, p->getCurrentPosition().y), 2);
+//            force.z += (m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(distance(m_meshes[i]->getCurrentPosition().z,p->getCurrentPosition().z), 2);
+//            std::cout<<"pow x-----" << pow(distance(m_meshes[i]->getCurrentPosition().x,p->getCurrentPosition().x), 2)<<std::endl;
+//            std::cout<<"force x: "<<force.x<<" force y: "<<force.y<<" force z: "<<force.z<<std::endl;
+            
+        }
+    }
+    
+    return force;
+    
+}
+
+Vector3 SolarViewer::calculateVertexDistance(Vector3 a, Vector3 b){
+    return Vector3 (b.x-a.x, b.y-a.y, b.z-a.z);
+}
+
+void SolarViewer::move(float dt){
+    for(int i= 0; i < NUMBER_PARTICLES;i++){
+        
+//        Vector3 currentPos = m_meshes[i]->getCurrentPosition();
+//        Vector3 previousPosition = (currentPos.x, currentPos.y, currentPos.z);
+        Vector3 forceTot = calculateForces(m_meshes[i]);
+        
+        //Calculate acceleration
+        Vector3 a = (forceTot.x/m_meshes[i]->getMass(), forceTot.y/m_meshes[i]->getMass(), forceTot.z/m_meshes[i]->getMass());
+        
+        //set the new speed
+        m_meshes[i]->setSpeed(Vector3 (m_meshes[i]->getSpeed().x + dt*a.x, m_meshes[i]->getSpeed().y + dt*a.y, m_meshes[i]->getSpeed().z + dt*a.z));
+        
+        //set the new position
+        m_meshes[i]->setCurrentPosition(Vector3 (m_meshes[i]->getCurrentPosition().x + dt*m_meshes[i]->getSpeed().x, m_meshes[i]->getCurrentPosition().y + dt*m_meshes[i]->getSpeed().y, m_meshes[i]->getCurrentPosition().z + dt*m_meshes[i]->getSpeed().z));
+        
+//        float nextPosX = previousPosition.x+m_meshes[i]->getSpeed().x*dt+(((1/2)*forceTot.x)/m_meshes[i]->getMass())*pow(dt, 2);
+//        float nextPosY = previousPosition.y+m_meshes[i]->getSpeed().y*dt+(((1/2)*forceTot.y)/m_meshes[i]->getMass())*pow(dt, 2);
+//        float nextPosZ = previousPosition.z+m_meshes[i]->getSpeed().z*dt+(((1/2)*forceTot.z)/m_meshes[i]->getMass())*pow(dt, 2);
+//        Vector3 nextPostion = (nextPosX, nextPosY, nextPosZ);
+//        m_meshes[i]->setCurrentPosition(nextPostion);
+//        float speedX = distance(m_meshes[i]->getCurrentPosition().x, previousPosition.x)/dt;
+//        float speedY = distance(m_meshes[i]->getCurrentPosition().y, previousPosition.y)/dt;
+//        float speedZ = distance(m_meshes[i]->getCurrentPosition().z, previousPosition.z)/dt;
+//        std::cout<<"x: "<<m_meshes[i]->getCurrentPosition().x<<" y: "<<m_meshes[i]->getCurrentPosition().y<<" z: "<<m_meshes[i]->getCurrentPosition().z<<std::endl;
+//        std::cout<<"speed x: "<<m_meshes[i]->getSpeed().x<<" speed y: "<<m_meshes[i]->getSpeed().y<<" speed z: "<<m_meshes[i]->getSpeed().z<<std::endl;
+    }
+    
+    glutPostRedisplay();
+    
 }
 
 
