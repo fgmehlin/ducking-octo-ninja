@@ -129,6 +129,7 @@ protected:
 	float daysPerMiliSecond;
 	float totalDaysElapsed;
 	float currentTime;
+    float totalTime;
     
    
 	

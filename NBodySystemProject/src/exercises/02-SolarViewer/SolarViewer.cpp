@@ -19,9 +19,9 @@
 
 //== IMPLEMENTATION ========================================================== 
 #define GRAVITY 6.673*pow(10, -11)
-#define NUMBER_PARTICLES 2000
-#define RANGE 1200
-#define SPEED 5
+#define NUMBER_PARTICLES 600
+#define RANGE 100
+#define SPEED 0.001
 
 
 SolarViewer::
@@ -87,11 +87,11 @@ init()
     m_meshes.push_back(createCube());
     m_meshes[NUMBER_PARTICLES]->setCurrentPosition(Vector3 (0.0, 0.0, 0.0));
     m_meshes[NUMBER_PARTICLES]->setSpeed(0.0);
-    m_meshes[NUMBER_PARTICLES]->setMass(100000000.0);
-    m_meshes[NUMBER_PARTICLES]->scaleObject( Vector3(20,20,20) );
+    m_meshes[NUMBER_PARTICLES]->setMass(100000000000.0);
+    m_meshes[NUMBER_PARTICLES]->scaleObject( Vector3(10,10,10) );
     m_meshes[NUMBER_PARTICLES]->setID(NUMBER_PARTICLES);
 	
-    for (int i = 0; i < NUMBER_PARTICLES; i++) {
+    for (int i = 0; i < NUMBER_PARTICLES/2; i++) {
         // move cube to (0,0,1)
         float x = RandomFloat(-RANGE, RANGE);
         float y = RandomFloat(-RANGE, RANGE);
@@ -99,10 +99,34 @@ init()
         
         m_meshes[i]->setCurrentPosition(Vector3(x ,y ,z));
         std::cout<<"x: "<<m_meshes[i]->getCurrentPosition().x<<" y: "<<m_meshes[i]->getCurrentPosition().y<<" z: "<<m_meshes[i]->getCurrentPosition().z<<std::endl;
-        m_meshes[i]->scaleObject( Vector3(8,8,8) );
+        m_meshes[i]->scaleObject( Vector3(5,5,5) );
         m_meshes[i]->translateWorld(m_meshes[i]->getCurrentPosition());
         m_meshes[i]->setID(i);
-        m_meshes[i]->setMass(10.0);
+        
+        float mass = RandomFloat(100.0, 100000.0);
+        m_meshes[i]->setMass(mass);
+        float speedX = RandomFloat(-SPEED, SPEED);
+        float speedY = RandomFloat(-SPEED, SPEED);
+        float speedZ = RandomFloat(-SPEED, SPEED);
+        m_meshes[i]->setSpeed(Vector3(speedX, speedY, speedZ));
+        std::cout<<"x: "<<m_meshes[i]->getSpeed().x<<" y: "<<m_meshes[i]->getSpeed().y<<" z: "<<m_meshes[i]->getSpeed().z<<std::endl;
+        
+    }
+    
+    for (int i = NUMBER_PARTICLES/2; i < NUMBER_PARTICLES; i++) {
+        // move cube to (0,0,1)
+        float x = RandomFloat(-RANGE, RANGE);
+        float y = RandomFloat(-RANGE, RANGE);
+        float z = RandomFloat(-RANGE, RANGE);
+        
+        m_meshes[i]->setCurrentPosition(Vector3(x ,y ,z));
+        std::cout<<"x: "<<m_meshes[i]->getCurrentPosition().x<<" y: "<<m_meshes[i]->getCurrentPosition().y<<" z: "<<m_meshes[i]->getCurrentPosition().z<<std::endl;
+        m_meshes[i]->scaleObject( Vector3(15,15,15) );
+        m_meshes[i]->translateWorld(m_meshes[i]->getCurrentPosition());
+        m_meshes[i]->setID(i);
+        
+        float mass = RandomFloat(1000000000.0, 1000000000.0);
+        m_meshes[i]->setMass(mass);
         float speedX = RandomFloat(-SPEED, SPEED);
         float speedY = RandomFloat(-SPEED, SPEED);
         float speedZ = RandomFloat(-SPEED, SPEED);
@@ -358,17 +382,23 @@ void SolarViewer::idle()
 		float prevTime = currentTime;
 		currentTime = watch.stop();
         float timeElapsed = currentTime - prevTime;
-        std::cout<<"timeElapsed: "<<timeElapsed<<std::endl;
+//        totalTime = totalTime + timeElapsed;
+//        std::cout<<"timeElapsed: "<<timeElapsed<<std::endl;
 		float daysElapsed = daysPerMiliSecond * (currentTime-prevTime);
 		totalDaysElapsed += daysElapsed;
 		
 		//Exercise 4.3 Rotate the earth and the moon
 		
 		//Optional: Rotate the planets
-        
-        move(timeElapsed/1000);
+        std::cout<<"totalTIME"<<totalTime<<std::endl;
+        move(daysElapsed);
         for (int i = 0; i < NUMBER_PARTICLES; i++) {
+//            Vector3 distanceVertex = calculateVertexDistance(Vector3(0.0,0.0,0.0), m_meshes[i]->getCurrentPosition());
+//            
+//            float norme = sqrt(pow(distanceVertex.x, 2) + pow(distanceVertex.y,2) + pow(distanceVertex.z,2));
+//            if(norme <1000){
            m_meshes[i]->translateWorld(m_meshes[i]->getCurrentPosition());
+            
         }
 		
 		glutPostRedisplay();
@@ -578,13 +608,37 @@ Vector3 SolarViewer::calculateForces(Mesh3D* p){
     for(int i = 0; i < NUMBER_PARTICLES + 1; i++){
         if(m_meshes[i]->getID() != p->getID()){
             
-            
+            if(i != NUMBER_PARTICLES){
                 
-            Vector3 distanceVertex = calculateVertexDistance(p->getCurrentPosition(), m_meshes[i]->getCurrentPosition());
+            Vector3 distanceVertex = calculateVertexDistance(m_meshes[i]->getCurrentPosition(), p->getCurrentPosition());
             
-            float norme = pow(pow(distanceVertex.x, 2) + pow(distanceVertex.y,2) + pow(distanceVertex.z,2), 1/2);
             
-            force += -(m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(norme, 2)*distanceVertex.normalize();
+            float norme = sqrt(pow(distanceVertex.x, 2) + pow(distanceVertex.y,2) + pow(distanceVertex.z,2));
+            
+            
+            force += -((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(norme, 2))*distanceVertex.normalize();
+                
+            }else{
+                Vector3 distanceVertex = calculateVertexDistance(m_meshes[i]->getCurrentPosition(), p->getCurrentPosition());
+                
+                
+                float norme = sqrt(pow(distanceVertex.x, 2) + pow(distanceVertex.y,2) + pow(distanceVertex.z,2));
+                
+                if(norme > 300){
+                
+                 force += -100000000000*((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(norme, 2))*distanceVertex.normalize();
+                }else if(norme < 100){
+                    
+                    force += -(1/10000)*((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(norme, 2))*distanceVertex.normalize();
+                }else{
+                    force += -((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(norme, 2))*distanceVertex.normalize();
+                }
+            }
+            
+//            std::cout<<"m1*m2*g: "<<m_meshes[i]->getMass()*p->getMass()*GRAVITY<<std::endl;
+//            std:cout<<"norme: "<<norme<<std::endl;
+
+//            std::cout<<"valueinsideforce: "<<((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(norme, 2))<<std::endl;
             
 //            force.y += (m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(distance(m_meshes[i]->getCurrentPosition().y, p->getCurrentPosition().y), 2);
 //            force.z += (m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(distance(m_meshes[i]->getCurrentPosition().z,p->getCurrentPosition().z), 2);
@@ -603,20 +657,43 @@ Vector3 SolarViewer::calculateVertexDistance(Vector3 a, Vector3 b){
 }
 
 void SolarViewer::move(float dt){
+std:cout<<"timeElapsed"<<dt<<std::endl;
     for(int i= 0; i < NUMBER_PARTICLES;i++){
         
 //        Vector3 currentPos = m_meshes[i]->getCurrentPosition();
 //        Vector3 previousPosition = (currentPos.x, currentPos.y, currentPos.z);
         Vector3 forceTot = calculateForces(m_meshes[i]);
-        
+//        std::cout<<"Forcex: "<<forceTot.x<<" y: "<<forceTot.y<<" z: "<<forceTot.z<<std::endl;
+
         //Calculate acceleration
-        Vector3 a = (forceTot.x/m_meshes[i]->getMass(), forceTot.y/m_meshes[i]->getMass(), forceTot.z/m_meshes[i]->getMass());
+        Vector3 a;
+        a.x=100*forceTot.x/m_meshes[i]->getMass();
+        a.y=100*forceTot.y/m_meshes[i]->getMass();
+        a.z=100*forceTot.z/m_meshes[i]->getMass();
+//        std::cout<<"ACCEx: "<<a.x<<" y: "<<a.y<<" z: "<<a.z<<std::endl;
         
+
+
+        
+//        if(norme > 100){
         //set the new speed
         m_meshes[i]->setSpeed(Vector3 (m_meshes[i]->getSpeed().x + dt*a.x, m_meshes[i]->getSpeed().y + dt*a.y, m_meshes[i]->getSpeed().z + dt*a.z));
+//        std::cout<<"SPEEDx: "<<m_meshes[i]->getSpeed().x<<" y: "<<m_meshes[i]->getSpeed().y<<" z: "<<m_meshes[i]->getSpeed().z<<std::endl;
+            
+            
+//            std::cout<<"GOOD: "<<norme<<"index: "<<i<<std::endl;
+//        }else{
+//            m_meshes[i]->setSpeed(Vector3(0.0,0.0,0.0));
+//            std::cout<<"BAD: "<<norme<<"index: "<<i<<std::endl;
+//        }
+
         
         //set the new position
+        
         m_meshes[i]->setCurrentPosition(Vector3 (m_meshes[i]->getCurrentPosition().x + dt*m_meshes[i]->getSpeed().x, m_meshes[i]->getCurrentPosition().y + dt*m_meshes[i]->getSpeed().y, m_meshes[i]->getCurrentPosition().z + dt*m_meshes[i]->getSpeed().z));
+
+//        std::cout<<"SPEEDx: "<<m_meshes[i]->getSpeed().x<<" y: "<<m_meshes[i]->getSpeed().y<<" z: "<<m_meshes[i]->getSpeed().z<<std::endl;
+        
         
 //        float nextPosX = previousPosition.x+m_meshes[i]->getSpeed().x*dt+(((1/2)*forceTot.x)/m_meshes[i]->getMass())*pow(dt, 2);
 //        float nextPosY = previousPosition.y+m_meshes[i]->getSpeed().y*dt+(((1/2)*forceTot.y)/m_meshes[i]->getMass())*pow(dt, 2);
