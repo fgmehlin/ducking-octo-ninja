@@ -19,7 +19,7 @@
 
 //== IMPLEMENTATION ========================================================== 
 #define GRAVITY 6.673*pow(10, -11)
-#define NUMBER_PARTICLES 600
+#define NUMBER_PARTICLES 500
 #define RANGE 100
 #define SPEED 0.001
 
@@ -87,7 +87,7 @@ init()
     m_meshes.push_back(createCube());
     m_meshes[NUMBER_PARTICLES]->setCurrentPosition(Vector3 (0.0, 0.0, 0.0));
     m_meshes[NUMBER_PARTICLES]->setSpeed(0.0);
-    m_meshes[NUMBER_PARTICLES]->setMass(100000000000.0);
+    m_meshes[NUMBER_PARTICLES]->setMass(1000000000000.0);
     m_meshes[NUMBER_PARTICLES]->scaleObject( Vector3(10,10,10) );
     m_meshes[NUMBER_PARTICLES]->setID(NUMBER_PARTICLES);
 	
@@ -125,7 +125,7 @@ init()
         m_meshes[i]->translateWorld(m_meshes[i]->getCurrentPosition());
         m_meshes[i]->setID(i);
         
-        float mass = RandomFloat(1000000000.0, 1000000000.0);
+        float mass = RandomFloat(500000000.0, 1000000000.0);
         m_meshes[i]->setMass(mass);
         float speedX = RandomFloat(-SPEED, SPEED);
         float speedY = RandomFloat(-SPEED, SPEED);
@@ -211,82 +211,6 @@ createCube()
 	cubeIndices.push_back(0);
 	cubeIndices.push_back(2);
 	cubeIndices.push_back(3);
-	
-	
-	// right
-	cubeVertices.push_back(Vector3( d,-d,-d));
-	cubeVertices.push_back(Vector3( d,-d, d));
-	cubeVertices.push_back(Vector3( d, d, d));
-	cubeVertices.push_back(Vector3( d, d,-d));
-	for(int k = 0; k < 4; k++) cubeNormals.push_back(Vector3(1,0,0));
-	for(int k = 0; k < 4; k++) cubeColors.push_back(Vector3(0.3,0.8,0.3));
-	cubeIndices.push_back(4);
-	cubeIndices.push_back(5);
-	cubeIndices.push_back(6);
-	cubeIndices.push_back(4);
-	cubeIndices.push_back(6);
-	cubeIndices.push_back(7);
-	
-	
-	// back
-	cubeVertices.push_back(Vector3( d,-d,-d));
-	cubeVertices.push_back(Vector3(-d,-d,-d));
-	cubeVertices.push_back(Vector3(-d, d,-d));
-	cubeVertices.push_back(Vector3( d, d,-d));
-	for(int k = 0; k < 4; k++) cubeNormals.push_back(Vector3(0,0,-1));
-	for(int k = 0; k < 4; k++) cubeColors.push_back(Vector3(0.3,0.3,0.8));
-	cubeIndices.push_back(8);
-	cubeIndices.push_back(9);
-	cubeIndices.push_back(10);
-	cubeIndices.push_back(8);
-	cubeIndices.push_back(10);
-	cubeIndices.push_back(11);
-	
-    
-	// left
-	cubeVertices.push_back(Vector3(-d,-d, d));
-	cubeVertices.push_back(Vector3(-d,-d,-d));
-	cubeVertices.push_back(Vector3(-d, d,-d));
-	cubeVertices.push_back(Vector3(-d, d, d));
-	for(int k = 0; k < 4; k++) cubeNormals.push_back(Vector3(-1,0,0));
-	for(int k = 0; k < 4; k++) cubeColors.push_back(Vector3(0.8,0.8,0.3));
-	cubeIndices.push_back(12);
-	cubeIndices.push_back(13);
-	cubeIndices.push_back(14);
-	cubeIndices.push_back(12);
-	cubeIndices.push_back(14);
-	cubeIndices.push_back(15);
-	
-    
-	// top
-	cubeVertices.push_back(Vector3(-d, d,-d));
-	cubeVertices.push_back(Vector3( d, d,-d));
-	cubeVertices.push_back(Vector3( d, d, d));
-	cubeVertices.push_back(Vector3(-d, d, d));
-	for(int k = 0; k < 4; k++) cubeNormals.push_back(Vector3(0,1,0));
-	for(int k = 0; k < 4; k++) cubeColors.push_back(Vector3(0.8,0.3,0.8));
-	cubeIndices.push_back(16);
-	cubeIndices.push_back(17);
-	cubeIndices.push_back(18);
-	cubeIndices.push_back(16);
-	cubeIndices.push_back(18);
-	cubeIndices.push_back(19);
-	
-    
-	// bottom
-	cubeVertices.push_back(Vector3( d,-d,-d));
-	cubeVertices.push_back(Vector3(-d,-d,-d));
-	cubeVertices.push_back(Vector3(-d,-d, d));
-	cubeVertices.push_back(Vector3( d,-d, d));
-	for(int k = 0; k < 4; k++) cubeNormals.push_back(Vector3(0,-1,0));
-	for(int k = 0; k < 4; k++) cubeColors.push_back(Vector3(0.3,0.8,0.8));
-	cubeIndices.push_back(20);
-	cubeIndices.push_back(21);
-	cubeIndices.push_back(22);
-	cubeIndices.push_back(20);
-	cubeIndices.push_back(22);
-	cubeIndices.push_back(23);
-	
 	
 	cube->setIndices(cubeIndices);
 	cube->setVertexPositions(cubeVertices);
@@ -460,6 +384,8 @@ draw_scene(DrawMode _draw_mode)
         // rotate the cube before rendering
         cube->rotateObject(Vector3(0,1,0), M_PI/4);
         
+        //cube->rotateWorld(<#const Vector3 &_axis#>, <#float _angle#>)
+        
         // send the model parameters to the shader
         m_cubeShader.setMatrix4x4Uniform("ModelWorldTransform", cube->getTransformation() );
         m_cubeShader.setMatrix3x3Uniform("ModelWorldNormalTransform", cube->getTransformation().Inverse().Transpose());
@@ -522,7 +448,8 @@ draw_cube(Mesh3D *mesh)
 	glNormalPointer( GL_DOUBLE, 0, mesh->getNormalPointer() );
 	glColorPointer( 3, GL_DOUBLE, 0, mesh->getColorPointer() );
 	
-	glDrawElements( GL_TRIANGLES, mesh->getNumberOfFaces()*3, GL_UNSIGNED_INT, mesh->getVertexIndicesPointer() );
+	glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, mesh->getVertexIndicesPointer() );
+    cout<<"number of faces : "<<mesh->getNumberOfFaces()<<std::endl;
 	
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
@@ -605,27 +532,19 @@ float SolarViewer::RandomFloat(float a, float b) {
 
 Vector3 SolarViewer::calculateForces(Mesh3D* p){
     Vector3 force = (0.0f, 0.0f, 0.0f);
-    for(int i = 0; i < NUMBER_PARTICLES + 1; i++){
+    for(int i = 0; i < NUMBER_PARTICLES ; i++){
         if(m_meshes[i]->getID() != p->getID()){
             
             if(i != NUMBER_PARTICLES){
                 
-            Vector3 distanceVertex = calculateVertexDistance(m_meshes[i]->getCurrentPosition(), p->getCurrentPosition());
-            
-            
-            float norme = sqrt(pow(distanceVertex.x, 2) + pow(distanceVertex.y,2) + pow(distanceVertex.z,2));
-            
-            
-            force += -((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(norme, 2))*distanceVertex.normalize();
-                
+                Vector3 distanceVertex = calculateVertexDistance(m_meshes[i]->getCurrentPosition(), p->getCurrentPosition());
+                float norme = sqrt(pow(distanceVertex.x, 2) + pow(distanceVertex.y,2) + pow(distanceVertex.z,2));
+                force += -((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(norme, 2))*distanceVertex.normalize();
             }else{
                 Vector3 distanceVertex = calculateVertexDistance(m_meshes[i]->getCurrentPosition(), p->getCurrentPosition());
-                
-                
                 float norme = sqrt(pow(distanceVertex.x, 2) + pow(distanceVertex.y,2) + pow(distanceVertex.z,2));
                 
-                if(norme > 300){
-                
+                if(norme > 500){
                  force += -100000000000*((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(norme, 2))*distanceVertex.normalize();
                 }else if(norme < 100){
                     
@@ -637,11 +556,7 @@ Vector3 SolarViewer::calculateForces(Mesh3D* p){
             
 //            std::cout<<"m1*m2*g: "<<m_meshes[i]->getMass()*p->getMass()*GRAVITY<<std::endl;
 //            std:cout<<"norme: "<<norme<<std::endl;
-
 //            std::cout<<"valueinsideforce: "<<((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(norme, 2))<<std::endl;
-            
-//            force.y += (m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(distance(m_meshes[i]->getCurrentPosition().y, p->getCurrentPosition().y), 2);
-//            force.z += (m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(distance(m_meshes[i]->getCurrentPosition().z,p->getCurrentPosition().z), 2);
 //            std::cout<<"pow x-----" << pow(distance(m_meshes[i]->getCurrentPosition().x,p->getCurrentPosition().x), 2)<<std::endl;
 //            std::cout<<"force x: "<<force.x<<" force y: "<<force.y<<" force z: "<<force.z<<std::endl;
             
@@ -651,6 +566,7 @@ Vector3 SolarViewer::calculateForces(Mesh3D* p){
     return force;
     
 }
+
 
 Vector3 SolarViewer::calculateVertexDistance(Vector3 a, Vector3 b){
     return Vector3 (b.x-a.x, b.y-a.y, b.z-a.z);
@@ -709,7 +625,19 @@ std:cout<<"timeElapsed"<<dt<<std::endl;
     
     glutPostRedisplay();
     
+    
+    
+    
+    
+    
 }
+
+
+
+
+
+
+
 
 
 //=============================================================================

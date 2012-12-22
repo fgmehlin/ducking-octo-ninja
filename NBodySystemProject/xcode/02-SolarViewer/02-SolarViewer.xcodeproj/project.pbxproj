@@ -273,6 +273,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = "02-SolarViewer";
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -284,6 +285,7 @@
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = "02-SolarViewer";
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};
