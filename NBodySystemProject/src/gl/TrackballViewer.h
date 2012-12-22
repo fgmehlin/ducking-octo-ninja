@@ -52,6 +52,7 @@ public:
      center so that the whole scene is visible. */
     void view_all();
     
+	Camera3D m_camera;
     
 protected:
     
@@ -90,7 +91,6 @@ protected:
 	Vector3 m_center;
 	
 	// camera object
-	Camera3D m_camera;
 	
 	double m_camera_rotation_depth;
 	

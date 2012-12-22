@@ -382,8 +382,95 @@ draw_scene(DrawMode _draw_mode)
         Matrix4 originalTransformation = cube->getTransformation();
         
         // rotate the cube before rendering
-        cube->rotateObject(Vector3(0,1,0), M_PI/4);
+        //cube->rotateObject(Vector3(0,1,0), M_PI/4);
         
+        
+        
+        Vector3 lookAt,objToCamProj, objToCam, upAux;
+        float angleCosine;
+        
+        
+      //  glPushMatrix();
+        
+        // objToCamProj is the vector in world coordinates from the
+        // local origin to the camera projected in the XZ plane
+        objToCamProj.x = m_camera.origin().x - cube->origin().x;
+        objToCamProj.y = 0;
+        objToCamProj.z = m_camera.origin().z - cube->origin().z;
+        
+        // This is the original lookAt vector for the object
+        // in world coordinates
+        lookAt.x = 0;
+        lookAt.y = 0;
+        lookAt.z = 1;
+        
+        
+        // normalize both vectors to get the cosine directly afterwards
+        objToCamProj = objToCamProj.normalize();
+        
+        // easy fix to determine wether the angle is negative or positive
+        // for positive angles upAux will be a vector pointing in the
+        // positive y direction, otherwise upAux will point downwards
+        // effectively reversing the rotation.
+        
+        upAux = lookAt.cross(objToCamProj);
+        
+        // compute the angle
+        angleCosine = (lookAt.x*objToCamProj.x + lookAt.y*objToCamProj.y + lookAt.z*objToCamProj.z);
+        
+        // perform the rotation. The if statement is used for stability reasons
+        // if the lookAt and objToCamProj vectors are too close together then
+        // |angleCosine| could be bigger than 1 due to lack of precision
+        if ((angleCosine < 0.99990) && (angleCosine > -0.9999)){
+            //glRotatef(acos(angleCosine)*180/3.14,upAux[0], upAux[1], upAux[2]);
+            cube->rotateObject(upAux, acos(angleCosine));
+        
+        }
+        
+        // so far it is just like the cylindrical billboard. The code for the
+        // second rotation comes now
+        // The second part tilts the object so that it faces the camera
+        
+        // objToCam is the vector in world coordinates from
+        // the local origin to the camera
+        
+//        cout<<"origine camera : ("<<m_camera.origin().x<<", "<<m_camera.origin().y<<", "<<m_camera.origin().z<<")"<<std::endl;
+        
+        objToCam[0] = m_camera.origin().x - cube->origin().x;
+        objToCam[1] = m_camera.origin().y - cube->origin().y;
+        objToCam[2] = m_camera.origin().z - cube->origin().z;
+        
+        // Normalize to get the cosine afterwards
+        objToCam = objToCam.normalize();
+        
+        // Compute the angle between objToCamProj and objToCam,
+        //i.e. compute the required angle for the lookup vector
+        
+        angleCosine = (objToCamProj.x*objToCam.x + objToCamProj.y*objToCam.y + objToCamProj.z*objToCam.z);
+        
+        
+        // Tilt the object. The test is done to prevent instability 
+        // when objToCam and objToCamProj have a very small
+        // angle between them
+        
+        Vector3 vec;
+        vec.y=0;
+        vec.z=0;
+        
+        
+        cout<<"angle : "<<angleCosine<<std::endl;
+        if ((angleCosine < 0.99990) && (angleCosine > -0.9999))
+            if (objToCam[1] < 0){
+                vec.x=1;
+                cube->rotateObject(vec, acos(angleCosine));
+                
+                //  glRotatef(acos(angleCosine)*180/3.14,1,0,0);
+            }else{
+                vec.x=-1;
+                cube->rotateObject(vec, acos(angleCosine));
+              //  glRotatef(acos(angleCosine)*180/3.14,-1,0,0);
+            }
+
         //cube->rotateWorld(<#const Vector3 &_axis#>, <#float _angle#>)
         
         // send the model parameters to the shader
