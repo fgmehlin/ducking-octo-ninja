@@ -19,7 +19,7 @@
 
 //== IMPLEMENTATION ========================================================== 
 #define GRAVITY 6.673*pow(10, -11)
-#define NUMBER_PARTICLES 500
+#define NUMBER_PARTICLES 600
 #define RANGE 100
 #define SPEED 0.001
 
@@ -87,33 +87,11 @@ init()
     m_meshes.push_back(createCube());
     m_meshes[NUMBER_PARTICLES]->setCurrentPosition(Vector3 (0.0, 0.0, 0.0));
     m_meshes[NUMBER_PARTICLES]->setSpeed(0.0);
-    m_meshes[NUMBER_PARTICLES]->setMass(1000000000000.0);
-    m_meshes[NUMBER_PARTICLES]->scaleObject( Vector3(10,10,10) );
+    m_meshes[NUMBER_PARTICLES]->setMass(100000000000000.0);
+    m_meshes[NUMBER_PARTICLES]->scaleObject( Vector3(5,5,5) );
     m_meshes[NUMBER_PARTICLES]->setID(NUMBER_PARTICLES);
 	
-    for (int i = 0; i < NUMBER_PARTICLES/2; i++) {
-        // move cube to (0,0,1)
-        float x = RandomFloat(-RANGE, RANGE);
-        float y = RandomFloat(-RANGE, RANGE);
-        float z = RandomFloat(-RANGE, RANGE);
-        
-        m_meshes[i]->setCurrentPosition(Vector3(x ,y ,z));
-        std::cout<<"x: "<<m_meshes[i]->getCurrentPosition().x<<" y: "<<m_meshes[i]->getCurrentPosition().y<<" z: "<<m_meshes[i]->getCurrentPosition().z<<std::endl;
-        m_meshes[i]->scaleObject( Vector3(5,5,5) );
-        m_meshes[i]->translateWorld(m_meshes[i]->getCurrentPosition());
-        m_meshes[i]->setID(i);
-        
-        float mass = RandomFloat(100.0, 100000.0);
-        m_meshes[i]->setMass(mass);
-        float speedX = RandomFloat(-SPEED, SPEED);
-        float speedY = RandomFloat(-SPEED, SPEED);
-        float speedZ = RandomFloat(-SPEED, SPEED);
-        m_meshes[i]->setSpeed(Vector3(speedX, speedY, speedZ));
-        std::cout<<"x: "<<m_meshes[i]->getSpeed().x<<" y: "<<m_meshes[i]->getSpeed().y<<" z: "<<m_meshes[i]->getSpeed().z<<std::endl;
-        
-    }
-    
-    for (int i = NUMBER_PARTICLES/2; i < NUMBER_PARTICLES; i++) {
+    for (int i = 0; i < 200; i++) {
         // move cube to (0,0,1)
         float x = RandomFloat(-RANGE, RANGE);
         float y = RandomFloat(-RANGE, RANGE);
@@ -125,7 +103,51 @@ init()
         m_meshes[i]->translateWorld(m_meshes[i]->getCurrentPosition());
         m_meshes[i]->setID(i);
         
-        float mass = RandomFloat(500000000.0, 1000000000.0);
+        float mass = RandomFloat(100.0, 10000.0);
+        m_meshes[i]->setMass(mass);
+        float speedX = RandomFloat(-SPEED, SPEED);
+        float speedY = RandomFloat(-SPEED, SPEED);
+        float speedZ = RandomFloat(-SPEED, SPEED);
+        m_meshes[i]->setSpeed(Vector3(speedX, speedY, speedZ));
+        std::cout<<"x: "<<m_meshes[i]->getSpeed().x<<" y: "<<m_meshes[i]->getSpeed().y<<" z: "<<m_meshes[i]->getSpeed().z<<std::endl;
+        
+    }
+    //block2
+    for (int i = 200; i < 400; i++) {
+        // move cube to (0,0,1)
+        float x = RandomFloat(-RANGE, RANGE);
+        float y = RandomFloat(-RANGE, RANGE);
+        float z = RandomFloat(-RANGE, RANGE);
+        
+        m_meshes[i]->setCurrentPosition(Vector3(x ,y ,z));
+        std::cout<<"x: "<<m_meshes[i]->getCurrentPosition().x<<" y: "<<m_meshes[i]->getCurrentPosition().y<<" z: "<<m_meshes[i]->getCurrentPosition().z<<std::endl;
+        m_meshes[i]->scaleObject( Vector3(15,15,15) );
+        m_meshes[i]->translateWorld(m_meshes[i]->getCurrentPosition());
+        m_meshes[i]->setID(i);
+        
+        float mass = RandomFloat(100000.0, 1000000.0);
+        m_meshes[i]->setMass(mass);
+        float speedX = RandomFloat(-SPEED, SPEED);
+        float speedY = RandomFloat(-SPEED, SPEED);
+        float speedZ = RandomFloat(-SPEED, SPEED);
+        m_meshes[i]->setSpeed(Vector3(speedX, speedY, speedZ));
+        std::cout<<"x: "<<m_meshes[i]->getSpeed().x<<" y: "<<m_meshes[i]->getSpeed().y<<" z: "<<m_meshes[i]->getSpeed().z<<std::endl;
+        
+    }
+    //block3
+    for (int i = 400; i < NUMBER_PARTICLES; i++) {
+        // move cube to (0,0,1)
+        float x = RandomFloat(-RANGE, RANGE);
+        float y = RandomFloat(-RANGE, RANGE);
+        float z = RandomFloat(-RANGE, RANGE);
+        
+        m_meshes[i]->setCurrentPosition(Vector3(x ,y ,z));
+        std::cout<<"x: "<<m_meshes[i]->getCurrentPosition().x<<" y: "<<m_meshes[i]->getCurrentPosition().y<<" z: "<<m_meshes[i]->getCurrentPosition().z<<std::endl;
+        m_meshes[i]->scaleObject( Vector3(15,15,15) );
+        m_meshes[i]->translateWorld(m_meshes[i]->getCurrentPosition());
+        m_meshes[i]->setID(i);
+        
+        float mass = RandomFloat(500000.0, 1000000000.0);
         m_meshes[i]->setMass(mass);
         float speedX = RandomFloat(-SPEED, SPEED);
         float speedY = RandomFloat(-SPEED, SPEED);
@@ -362,6 +384,7 @@ draw_scene(DrawMode _draw_mode)
 	glEnable(GL_DEPTH_TEST);
 	
 	m_meshShaderTexture.unbind();
+    m_camera.origin();
     
     ////////////////////////////////////////////particles//////////////////////////////////////////
 	
@@ -449,7 +472,7 @@ draw_cube(Mesh3D *mesh)
 	glColorPointer( 3, GL_DOUBLE, 0, mesh->getColorPointer() );
 	
 	glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, mesh->getVertexIndicesPointer() );
-    cout<<"number of faces : "<<mesh->getNumberOfFaces()<<std::endl;
+
 	
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
@@ -531,11 +554,11 @@ float SolarViewer::RandomFloat(float a, float b) {
 }
 
 Vector3 SolarViewer::calculateForces(Mesh3D* p){
-    Vector3 force = (0.0f, 0.0f, 0.0f);
-    for(int i = 0; i < NUMBER_PARTICLES ; i++){
+    Vector3 force ;
+    for(int i = 0; i < NUMBER_PARTICLES + 1; i++){
         if(m_meshes[i]->getID() != p->getID()){
             
-            if(i != NUMBER_PARTICLES){
+            if(i < NUMBER_PARTICLES){
                 
                 Vector3 distanceVertex = calculateVertexDistance(m_meshes[i]->getCurrentPosition(), p->getCurrentPosition());
                 float norme = sqrt(pow(distanceVertex.x, 2) + pow(distanceVertex.y,2) + pow(distanceVertex.z,2));
@@ -545,7 +568,7 @@ Vector3 SolarViewer::calculateForces(Mesh3D* p){
                 float norme = sqrt(pow(distanceVertex.x, 2) + pow(distanceVertex.y,2) + pow(distanceVertex.z,2));
                 
                 if(norme > 500){
-                 force += -100000000000*((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(norme, 2))*distanceVertex.normalize();
+                 force += -10000000000*((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(norme, 2))*distanceVertex.normalize();
                 }else if(norme < 100){
                     
                     force += -(1/10000)*((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(norme, 2))*distanceVertex.normalize();
@@ -580,7 +603,8 @@ std:cout<<"timeElapsed"<<dt<<std::endl;
 //        Vector3 previousPosition = (currentPos.x, currentPos.y, currentPos.z);
         Vector3 forceTot = calculateForces(m_meshes[i]);
 //        std::cout<<"Forcex: "<<forceTot.x<<" y: "<<forceTot.y<<" z: "<<forceTot.z<<std::endl;
-
+        Vector3 distanceVertex = calculateVertexDistance(m_meshes[i]->getCurrentPosition(), Vector3(0.0f,0.0f,0.0f));
+        float norme = sqrt(pow(distanceVertex.x, 2) + pow(distanceVertex.y,2) + pow(distanceVertex.z,2));
         //Calculate acceleration
         Vector3 a;
         a.x=100*forceTot.x/m_meshes[i]->getMass();
@@ -608,6 +632,7 @@ std:cout<<"timeElapsed"<<dt<<std::endl;
         
         m_meshes[i]->setCurrentPosition(Vector3 (m_meshes[i]->getCurrentPosition().x + dt*m_meshes[i]->getSpeed().x, m_meshes[i]->getCurrentPosition().y + dt*m_meshes[i]->getSpeed().y, m_meshes[i]->getCurrentPosition().z + dt*m_meshes[i]->getSpeed().z));
 
+
 //        std::cout<<"SPEEDx: "<<m_meshes[i]->getSpeed().x<<" y: "<<m_meshes[i]->getSpeed().y<<" z: "<<m_meshes[i]->getSpeed().z<<std::endl;
         
         
@@ -622,7 +647,12 @@ std:cout<<"timeElapsed"<<dt<<std::endl;
 //        std::cout<<"x: "<<m_meshes[i]->getCurrentPosition().x<<" y: "<<m_meshes[i]->getCurrentPosition().y<<" z: "<<m_meshes[i]->getCurrentPosition().z<<std::endl;
 //        std::cout<<"speed x: "<<m_meshes[i]->getSpeed().x<<" speed y: "<<m_meshes[i]->getSpeed().y<<" speed z: "<<m_meshes[i]->getSpeed().z<<std::endl;
     }
-    
+     std::cout<<"CAMx: "<<m_camera.origin().x<<std::endl;
+    std::cout<<"CAMy: "<<m_camera.origin().y<<std::endl;
+
+    std::cout<<"CAMz: "<<m_camera.origin().z<<std::endl;
+
+
     glutPostRedisplay();
     
     
