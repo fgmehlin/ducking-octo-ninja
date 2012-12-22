@@ -19,7 +19,7 @@
 
 //== IMPLEMENTATION ========================================================== 
 #define GRAVITY 6.673*pow(10, -11)
-#define NUMBER_PARTICLES 600
+#define NUMBER_PARTICLES 550
 #define RANGE 100
 #define SPEED 0.001
 
