@@ -71,7 +71,7 @@ protected:
     Mesh3D *createCube();
 	
 	virtual void draw_scene(DrawMode _draw_mode);
-    void draw_cube(Mesh3D *mesh);
+    void draw_cube(Shader& sh, Mesh3D *mesh);
 
     void draw_object(Shader& sh, Mesh3D& mesh);
 	void draw_object(Shader& sh, Mesh3D& mesh, bool showTexture);
@@ -81,7 +81,8 @@ protected:
     Vector3 calculateVertexDistance(Vector3 a, Vector3 b);
     
 public:
-    void move(float timeElapsed);
+    void move(float timeElapsed, float totalTime);
+    void rescaleOuterPosition();
 
 protected:
 	

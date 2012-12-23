@@ -236,7 +236,7 @@ public:
 			indxr[i] = irow;
 			indxc[i] = icol;
 			if (minv[icol][icol] == 0.){
-				std::cout << "Singular matrix in MatrixInvert\n";
+//				std::cout << "Singular matrix in MatrixInvert\n";
 			}
 			// Set $m[icol][icol]$ to one by scaling row _icol_ appropriately
 			double pivinv = 1.f / minv[icol][icol];

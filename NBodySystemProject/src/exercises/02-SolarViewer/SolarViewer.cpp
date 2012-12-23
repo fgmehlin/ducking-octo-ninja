@@ -98,18 +98,20 @@ init()
         float z = RandomFloat(-RANGE, RANGE);
         
         m_meshes[i]->setCurrentPosition(Vector3(x ,y ,z));
-        std::cout<<"x: "<<m_meshes[i]->getCurrentPosition().x<<" y: "<<m_meshes[i]->getCurrentPosition().y<<" z: "<<m_meshes[i]->getCurrentPosition().z<<std::endl;
-        m_meshes[i]->scaleObject( Vector3(15,15,15) );
+//        std::cout<<"x: "<<m_meshes[i]->getCurrentPosition().x<<" y: "<<m_meshes[i]->getCurrentPosition().y<<" z: "<<m_meshes[i]->getCurrentPosition().z<<std::endl;
+        
         m_meshes[i]->translateWorld(m_meshes[i]->getCurrentPosition());
         m_meshes[i]->setID(i);
         
         float mass = RandomFloat(100.0, 10000.0);
         m_meshes[i]->setMass(mass);
+        
+        m_meshes[i]->scaleObject( Vector3(200,200,200) );
         float speedX = RandomFloat(-SPEED, SPEED);
         float speedY = RandomFloat(-SPEED, SPEED);
         float speedZ = RandomFloat(-SPEED, SPEED);
         m_meshes[i]->setSpeed(Vector3(speedX, speedY, speedZ));
-        std::cout<<"x: "<<m_meshes[i]->getSpeed().x<<" y: "<<m_meshes[i]->getSpeed().y<<" z: "<<m_meshes[i]->getSpeed().z<<std::endl;
+//        std::cout<<"x: "<<m_meshes[i]->getSpeed().x<<" y: "<<m_meshes[i]->getSpeed().y<<" z: "<<m_meshes[i]->getSpeed().z<<std::endl;
         
     }
     //block2
@@ -120,18 +122,20 @@ init()
         float z = RandomFloat(-RANGE, RANGE);
         
         m_meshes[i]->setCurrentPosition(Vector3(x ,y ,z));
-        std::cout<<"x: "<<m_meshes[i]->getCurrentPosition().x<<" y: "<<m_meshes[i]->getCurrentPosition().y<<" z: "<<m_meshes[i]->getCurrentPosition().z<<std::endl;
-        m_meshes[i]->scaleObject( Vector3(15,15,15) );
+
+        
         m_meshes[i]->translateWorld(m_meshes[i]->getCurrentPosition());
         m_meshes[i]->setID(i);
         
         float mass = RandomFloat(100000.0, 1000000.0);
         m_meshes[i]->setMass(mass);
+        
+        m_meshes[i]->scaleObject( Vector3(200,200,200) );
         float speedX = RandomFloat(-SPEED, SPEED);
         float speedY = RandomFloat(-SPEED, SPEED);
         float speedZ = RandomFloat(-SPEED, SPEED);
         m_meshes[i]->setSpeed(Vector3(speedX, speedY, speedZ));
-        std::cout<<"x: "<<m_meshes[i]->getSpeed().x<<" y: "<<m_meshes[i]->getSpeed().y<<" z: "<<m_meshes[i]->getSpeed().z<<std::endl;
+
         
     }
     //block3
@@ -143,17 +147,20 @@ init()
         
         m_meshes[i]->setCurrentPosition(Vector3(x ,y ,z));
         std::cout<<"x: "<<m_meshes[i]->getCurrentPosition().x<<" y: "<<m_meshes[i]->getCurrentPosition().y<<" z: "<<m_meshes[i]->getCurrentPosition().z<<std::endl;
-        m_meshes[i]->scaleObject( Vector3(15,15,15) );
+//        m_meshes[i]->scaleObject( Vector3(20,20,20) );
         m_meshes[i]->translateWorld(m_meshes[i]->getCurrentPosition());
         m_meshes[i]->setID(i);
         
         float mass = RandomFloat(500000.0, 1000000000.0);
         m_meshes[i]->setMass(mass);
+        
+        m_meshes[i]->scaleObject( Vector3(200,200,200) );
+
         float speedX = RandomFloat(-SPEED, SPEED);
         float speedY = RandomFloat(-SPEED, SPEED);
         float speedZ = RandomFloat(-SPEED, SPEED);
         m_meshes[i]->setSpeed(Vector3(speedX, speedY, speedZ));
-        std::cout<<"x: "<<m_meshes[i]->getSpeed().x<<" y: "<<m_meshes[i]->getSpeed().y<<" z: "<<m_meshes[i]->getSpeed().z<<std::endl;
+
         
     }
     
@@ -211,12 +218,20 @@ createCube()
 {
     // initialize Mesh3D
     Mesh3D *cube = new Mesh3D();
-    
+    MeshMaterial* material = new MeshMaterial;
+    material->m_diffuseTexture.create("particle.tga");
 	// setup uniform cube with side length 0.5 and center of cube being (0,0,0)
 	std::vector< Vector3 > cubeVertices;
 	std::vector< Vector3 > cubeNormals;
 	std::vector< Vector3 > cubeColors;
 	std::vector< unsigned int > cubeIndices;
+    std::vector<Vector2> uvTextureCoord;
+    
+    uvTextureCoord.push_back(Vector2(0.0f, 0.0f));
+    uvTextureCoord.push_back(Vector2(1.0f, 0.0f));
+    uvTextureCoord.push_back(Vector2(1.0f, 1.0f));
+    uvTextureCoord.push_back(Vector2(0.0f, 1.0f));
+    
 	float d = 1.0;
     
 	
@@ -234,10 +249,11 @@ createCube()
 	cubeIndices.push_back(2);
 	cubeIndices.push_back(3);
 	
-	cube->setIndices(cubeIndices);
+	cube->setIndices(cubeIndices, material);
 	cube->setVertexPositions(cubeVertices);
 	cube->setVertexNormals(cubeNormals);
 	cube->setVertexColors(cubeColors);
+    cube->setVertexUV(uvTextureCoord);
     
     return cube;
 }
@@ -262,10 +278,6 @@ keyboard(int key, int x, int y)
 			
 			m_showTextureSun = !m_showTextureSun;
             
-            
-//                if(!m_particle.hasUvTextureCoord()) m_showTextureSun = false;
-            
-			
             break;
 		case 'g':
 			m_geocentric = !m_geocentric;
@@ -328,7 +340,6 @@ void SolarViewer::idle()
 		float prevTime = currentTime;
 		currentTime = watch.stop();
         float timeElapsed = currentTime - prevTime;
-//        totalTime = totalTime + timeElapsed;
 //        std::cout<<"timeElapsed: "<<timeElapsed<<std::endl;
 		float daysElapsed = daysPerMiliSecond * (currentTime-prevTime);
 		totalDaysElapsed += daysElapsed;
@@ -336,13 +347,10 @@ void SolarViewer::idle()
 		//Exercise 4.3 Rotate the earth and the moon
 		
 		//Optional: Rotate the planets
-        std::cout<<"totalTIME"<<totalTime<<std::endl;
-        move(daysElapsed);
+
+        move(daysElapsed, totalDaysElapsed);
         for (int i = 0; i < NUMBER_PARTICLES; i++) {
-//            Vector3 distanceVertex = calculateVertexDistance(Vector3(0.0,0.0,0.0), m_meshes[i]->getCurrentPosition());
-//            
-//            float norme = sqrt(pow(distanceVertex.x, 2) + pow(distanceVertex.y,2) + pow(distanceVertex.z,2));
-//            if(norme <1000){
+
            m_meshes[i]->translateWorld(m_meshes[i]->getCurrentPosition());
             
         }
@@ -357,10 +365,11 @@ void
 SolarViewer::
 draw_scene(DrawMode _draw_mode)
 {
-
+    
 	
 	// clear screen
 	glEnable(GL_DEPTH_TEST);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f); 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glDisable(GL_CULL_FACE);
 	glEnable(GL_MULTISAMPLE);
@@ -373,47 +382,57 @@ draw_scene(DrawMode _draw_mode)
 	
 	
 	//stars
-	glDisable(GL_DEPTH_TEST);
-	m_Stars.setIdentity();
-	m_Stars.scaleObject(Vector3(m_starsScale, m_starsScale, m_starsScale));
-	m_Stars.translateWorld(Vector3(m_camera.origin()));
-	m_meshShaderTexture.setMatrix4x4Uniform("modelworld", m_Stars.getTransformation() );
-	m_Stars.getMaterial(0).m_diffuseTexture.bind();
-	m_meshShaderTexture.setIntUniform("texture", m_Stars.getMaterial(0).m_diffuseTexture.getLayer());
-	draw_object(m_meshShaderTexture, m_Stars);
-	glEnable(GL_DEPTH_TEST);
+    //	glDisable(GL_DEPTH_TEST);
+    //	m_Stars.setIdentity();
+    //	m_Stars.scaleObject(Vector3(m_starsScale, m_starsScale, m_starsScale));
+    //	m_Stars.translateWorld(Vector3(m_camera.origin()));
+    //	m_meshShaderTexture.setMatrix4x4Uniform("modelworld", m_Stars.getTransformation() );
+    //	m_Stars.getMaterial(0).m_diffuseTexture.bind();
+    //	m_meshShaderTexture.setIntUniform("texture", m_Stars.getMaterial(0).m_diffuseTexture.getLayer());
+    //	draw_object(m_meshShaderTexture, m_Stars);
+    //	glEnable(GL_DEPTH_TEST);
+    
+    //    m_meshShaderTexture.setMatrix4x4Uniform("modelworld", m_Sun.getTransformation() );
+    //	m_Sun.getMaterial(0).m_diffuseTexture.bind();
+    //	m_meshShaderTexture.setIntUniform("texture", m_Sun.getMaterial(0).m_diffuseTexture.getLayer());
+    //	draw_object(m_meshShaderTexture, m_Sun);
 	
 	m_meshShaderTexture.unbind();
-    m_camera.origin();
     
     ////////////////////////////////////////////particles//////////////////////////////////////////
 	
     // first bind the shader
 	m_cubeShader.bind(); 
-	
+    
 	// set parameters to send to the shader
 	m_cubeShader.setMatrix4x4Uniform("WorldCameraTransform", m_camera.getTransformation().Inverse());
 	m_cubeShader.setMatrix3x3Uniform("WorldCameraNormalTransform", m_camera.getTransformation().Transpose());
 	m_cubeShader.setMatrix4x4Uniform("ProjectionMatrix", m_camera.getProjectionMatrix());
     
+    
+    
+    
+    
     for (std::vector<Mesh3D*>::iterator mIt = m_meshes.begin(); mIt != m_meshes.end(); ++mIt)
     {
         Mesh3D *cube = *mIt;
+        m_meshShaderTexture.bind();
+        m_meshShaderTexture.setMatrix4x4Uniform("worldcamera", m_camera.getTransformation().Inverse());
+        m_meshShaderTexture.setMatrix4x4Uniform("projection", m_camera.getProjectionMatrix());
+        m_meshShaderTexture.setMatrix4x4Uniform("modelworld", cube->getTransformation());
+        cube->getMaterial(0).m_diffuseTexture.bind();
+        m_meshShaderTexture.setIntUniform("texture", m_Stars.getMaterial(0).m_diffuseTexture.getLayer());
         
         // besides during we can apply transformations just before rendering:
         // save the original transformation of the cube
         Matrix4 originalTransformation = cube->getTransformation();
-        
-        // rotate the cube before rendering
-        //cube->rotateObject(Vector3(0,1,0), M_PI/4);
-        
         
         
         Vector3 lookAt,objToCamProj, objToCam, upAux;
         float angleCosine;
         
         
-      //  glPushMatrix();
+        
         
         // objToCamProj is the vector in world coordinates from the
         // local origin to the camera projected in the XZ plane
@@ -445,9 +464,8 @@ draw_scene(DrawMode _draw_mode)
         // if the lookAt and objToCamProj vectors are too close together then
         // |angleCosine| could be bigger than 1 due to lack of precision
         if ((angleCosine < 0.99990) && (angleCosine > -0.9999)){
-            //glRotatef(acos(angleCosine)*180/3.14,upAux[0], upAux[1], upAux[2]);
             cube->rotateObject(upAux, acos(angleCosine));
-        
+            
         }
         
         // so far it is just like the cylindrical billboard. The code for the
@@ -456,8 +474,6 @@ draw_scene(DrawMode _draw_mode)
         
         // objToCam is the vector in world coordinates from
         // the local origin to the camera
-        
-//        cout<<"origine camera : ("<<m_camera.origin().x<<", "<<m_camera.origin().y<<", "<<m_camera.origin().z<<")"<<std::endl;
         
         objToCam[0] = m_camera.origin().x - cube->origin().x;
         objToCam[1] = m_camera.origin().y - cube->origin().y;
@@ -481,42 +497,33 @@ draw_scene(DrawMode _draw_mode)
         vec.z=0;
         
         
-        cout<<"angle : "<<angleCosine<<std::endl;
+//        cout<<"angle : "<<angleCosine<<std::endl;
         if ((angleCosine < 0.99990) && (angleCosine > -0.9999))
             if (objToCam[1] < 0){
                 vec.x=1;
                 cube->rotateObject(vec, acos(angleCosine));
                 
-                //  glRotatef(acos(angleCosine)*180/3.14,1,0,0);
             }else{
                 vec.x=-1;
                 cube->rotateObject(vec, acos(angleCosine));
-              //  glRotatef(acos(angleCosine)*180/3.14,-1,0,0);
+                
             }
-
-        //cube->rotateWorld(<#const Vector3 &_axis#>, <#float _angle#>)
+        
+        
         
         // send the model parameters to the shader
         m_cubeShader.setMatrix4x4Uniform("ModelWorldTransform", cube->getTransformation() );
         m_cubeShader.setMatrix3x3Uniform("ModelWorldNormalTransform", cube->getTransformation().Inverse().Transpose());
         
         // render the cube
-        draw_cube(cube);
+        draw_cube(m_meshShaderTexture, cube);
+        m_meshShaderTexture.unbind();
         
         // ((( Exercise 3.6 )))
         
         // then reset the original transformation
         cube->setTransformation( originalTransformation );
     }
-	
-    // for illustration render a small sphere at the world center
-	Matrix4 ident;
-	ident.loadIdentity();
-	m_cubeShader.setMatrix4x4Uniform("ModelWorldTransform", ident );
-	m_cubeShader.setMatrix3x3Uniform("ModelWorldNormalTransform", ident );
-	
-	glColor3f(1.0,1.0,1.0); // set sphere color to white
-	glutSolidSphere( 0.05, 10, 10 );
 	
 	// finally, unbind the shader
 	m_cubeShader.unbind();
@@ -533,37 +540,45 @@ draw_scene(DrawMode _draw_mode)
 	m_meshShaderDiffuse.setMatrix3x3Uniform("worldcameraNormal", m_camera.getTransformation().Transpose());
 	m_meshShaderDiffuse.setVector3Uniform("lightposition", lightPosInCamera.x, lightPosInCamera.y, lightPosInCamera.z );
 	m_meshShaderDiffuse.setVector3Uniform("lightcolor", m_recSunlightInt, m_recSunlightInt, m_recSunlightInt);
-
+    
 	
 	
 	
 	
 	
 	//Optional: Draw the planets
-	
 	m_meshShaderDiffuse.unbind();
     
-
+    
 }
-
 void
 SolarViewer::
-draw_cube(Mesh3D *mesh)
-{	
+draw_cube(Shader& sh, Mesh3D *mesh)
+{
+    glDisable(GL_DEPTH_TEST);
+    
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    sh.setMatrix4x4Uniform("modelworld", mesh->getTransformation() );
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    
 	
 	glVertexPointer( 3, GL_DOUBLE, 0, mesh->getVertexPointer() );
 	glNormalPointer( GL_DOUBLE, 0, mesh->getNormalPointer() );
-	glColorPointer( 3, GL_DOUBLE, 0, mesh->getColorPointer() );
+	glTexCoordPointer( 2, GL_DOUBLE, 0, mesh->getUvTextureCoordPointer() );
+    
 	
-	glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, mesh->getVertexIndicesPointer() );
-
+	for(unsigned int i = 0; i < mesh->getNumberOfParts(); i++)
+	{
+		glDrawElements( GL_TRIANGLES, mesh->getNumberOfFaces(i)*3, GL_UNSIGNED_INT, mesh->getVertexIndicesPointer(i) );
+	}
 	
-	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glEnable(GL_DEPTH_TEST);
 }
 
 
@@ -644,31 +659,28 @@ Vector3 SolarViewer::calculateForces(Mesh3D* p){
     Vector3 force ;
     for(int i = 0; i < NUMBER_PARTICLES + 1; i++){
         if(m_meshes[i]->getID() != p->getID()){
-            
+            float norme;
             if(i < NUMBER_PARTICLES){
                 
                 Vector3 distanceVertex = calculateVertexDistance(m_meshes[i]->getCurrentPosition(), p->getCurrentPosition());
-                float norme = sqrt(pow(distanceVertex.x, 2) + pow(distanceVertex.y,2) + pow(distanceVertex.z,2));
+                norme = sqrt(pow(distanceVertex.x, 2) + pow(distanceVertex.y,2) + pow(distanceVertex.z,2));
                 force += -((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(norme, 2))*distanceVertex.normalize();
             }else{
-                Vector3 distanceVertex = calculateVertexDistance(m_meshes[i]->getCurrentPosition(), p->getCurrentPosition());
-                float norme = sqrt(pow(distanceVertex.x, 2) + pow(distanceVertex.y,2) + pow(distanceVertex.z,2));
+                Vector3 distanceVertexSUN = calculateVertexDistance(m_meshes[i]->getCurrentPosition(), p->getCurrentPosition());
+                float normeSUN = sqrt(pow(distanceVertexSUN.x, 2) + pow(distanceVertexSUN.y,2) + pow(distanceVertexSUN.z,2));
                 
-                if(norme > 500){
-                 force += -10000000000*((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(norme, 2))*distanceVertex.normalize();
-                }else if(norme < 100){
+                if(normeSUN > 500){
+                 force += -10000000000*((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(normeSUN, 2))*distanceVertexSUN.normalize();
+                }else if(normeSUN < 100){
                     
-                    force += -(1/10000)*((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(norme, 2))*distanceVertex.normalize();
+                    force += -(1/10000)*((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(normeSUN, 2))*distanceVertexSUN.normalize();
                 }else{
-                    force += -((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(norme, 2))*distanceVertex.normalize();
+                    force += -((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(normeSUN, 2))*distanceVertexSUN.normalize();
                 }
+                
+                
             }
-            
-//            std::cout<<"m1*m2*g: "<<m_meshes[i]->getMass()*p->getMass()*GRAVITY<<std::endl;
-//            std:cout<<"norme: "<<norme<<std::endl;
-//            std::cout<<"valueinsideforce: "<<((m_meshes[i]->getMass()*p->getMass()*GRAVITY)/pow(norme, 2))<<std::endl;
-//            std::cout<<"pow x-----" << pow(distance(m_meshes[i]->getCurrentPosition().x,p->getCurrentPosition().x), 2)<<std::endl;
-//            std::cout<<"force x: "<<force.x<<" force y: "<<force.y<<" force z: "<<force.z<<std::endl;
+
             
         }
     }
@@ -682,79 +694,75 @@ Vector3 SolarViewer::calculateVertexDistance(Vector3 a, Vector3 b){
     return Vector3 (b.x-a.x, b.y-a.y, b.z-a.z);
 }
 
-void SolarViewer::move(float dt){
-std:cout<<"timeElapsed"<<dt<<std::endl;
+void SolarViewer::move(float dt, float totalTime){
+
+    
+    int timeToRescale = (int) (totalTime + 0.5);
+    if(timeToRescale%50 == 0){
+        rescaleOuterPosition();
+        std::cout<<"rescaling----------------------"<<std::endl;
+    }
+
+    std::cout<<"totalDays: "<<totalTime<<" TIME ELAPSED: "<<dt<<std::endl;
     for(int i= 0; i < NUMBER_PARTICLES;i++){
-        
-//        Vector3 currentPos = m_meshes[i]->getCurrentPosition();
-//        Vector3 previousPosition = (currentPos.x, currentPos.y, currentPos.z);
+
         Vector3 forceTot = calculateForces(m_meshes[i]);
-//        std::cout<<"Forcex: "<<forceTot.x<<" y: "<<forceTot.y<<" z: "<<forceTot.z<<std::endl;
         Vector3 distanceVertex = calculateVertexDistance(m_meshes[i]->getCurrentPosition(), Vector3(0.0f,0.0f,0.0f));
         float norme = sqrt(pow(distanceVertex.x, 2) + pow(distanceVertex.y,2) + pow(distanceVertex.z,2));
+        float normeForce = sqrt(pow(forceTot.x,2)+pow(forceTot.y,2)+pow(forceTot.z,2));
+        if(normeForce > 10000000000){
+            forceTot = forceTot/1000000;
+            
+        }
         //Calculate acceleration
         Vector3 a;
         a.x=100*forceTot.x/m_meshes[i]->getMass();
         a.y=100*forceTot.y/m_meshes[i]->getMass();
         a.z=100*forceTot.z/m_meshes[i]->getMass();
-//        std::cout<<"ACCEx: "<<a.x<<" y: "<<a.y<<" z: "<<a.z<<std::endl;
-        
 
-
-        
-//        if(norme > 100){
-        //set the new speed
         m_meshes[i]->setSpeed(Vector3 (m_meshes[i]->getSpeed().x + dt*a.x, m_meshes[i]->getSpeed().y + dt*a.y, m_meshes[i]->getSpeed().z + dt*a.z));
-//        std::cout<<"SPEEDx: "<<m_meshes[i]->getSpeed().x<<" y: "<<m_meshes[i]->getSpeed().y<<" z: "<<m_meshes[i]->getSpeed().z<<std::endl;
-            
-            
-//            std::cout<<"GOOD: "<<norme<<"index: "<<i<<std::endl;
-//        }else{
-//            m_meshes[i]->setSpeed(Vector3(0.0,0.0,0.0));
-//            std::cout<<"BAD: "<<norme<<"index: "<<i<<std::endl;
-//        }
-
+        float normeSpeed = sqrt(pow(m_meshes[i]->getSpeed().x,2)+pow(m_meshes[i]->getSpeed().y,2)+pow(m_meshes[i]->getSpeed().z,2));
         
+
+        if(i==0){
+            std::cout<<"ID: "<<m_meshes[i]->getID()<<" Norme: "<<norme<<" Masse: "<<m_meshes[i]->getMass()<<" NORMEFORCE: "<< normeForce<<" x :"<<forceTot.x<<" y :"<<forceTot.y<<" z :"<<forceTot.z<<" NORMESPEED: "<<normeSpeed<<std::endl;
+
+        }
+            
+            
+
         //set the new position
         
         m_meshes[i]->setCurrentPosition(Vector3 (m_meshes[i]->getCurrentPosition().x + dt*m_meshes[i]->getSpeed().x, m_meshes[i]->getCurrentPosition().y + dt*m_meshes[i]->getSpeed().y, m_meshes[i]->getCurrentPosition().z + dt*m_meshes[i]->getSpeed().z));
 
-
-//        std::cout<<"SPEEDx: "<<m_meshes[i]->getSpeed().x<<" y: "<<m_meshes[i]->getSpeed().y<<" z: "<<m_meshes[i]->getSpeed().z<<std::endl;
-        
-        
-//        float nextPosX = previousPosition.x+m_meshes[i]->getSpeed().x*dt+(((1/2)*forceTot.x)/m_meshes[i]->getMass())*pow(dt, 2);
-//        float nextPosY = previousPosition.y+m_meshes[i]->getSpeed().y*dt+(((1/2)*forceTot.y)/m_meshes[i]->getMass())*pow(dt, 2);
-//        float nextPosZ = previousPosition.z+m_meshes[i]->getSpeed().z*dt+(((1/2)*forceTot.z)/m_meshes[i]->getMass())*pow(dt, 2);
-//        Vector3 nextPostion = (nextPosX, nextPosY, nextPosZ);
-//        m_meshes[i]->setCurrentPosition(nextPostion);
-//        float speedX = distance(m_meshes[i]->getCurrentPosition().x, previousPosition.x)/dt;
-//        float speedY = distance(m_meshes[i]->getCurrentPosition().y, previousPosition.y)/dt;
-//        float speedZ = distance(m_meshes[i]->getCurrentPosition().z, previousPosition.z)/dt;
-//        std::cout<<"x: "<<m_meshes[i]->getCurrentPosition().x<<" y: "<<m_meshes[i]->getCurrentPosition().y<<" z: "<<m_meshes[i]->getCurrentPosition().z<<std::endl;
-//        std::cout<<"speed x: "<<m_meshes[i]->getSpeed().x<<" speed y: "<<m_meshes[i]->getSpeed().y<<" speed z: "<<m_meshes[i]->getSpeed().z<<std::endl;
     }
-     std::cout<<"CAMx: "<<m_camera.origin().x<<std::endl;
-    std::cout<<"CAMy: "<<m_camera.origin().y<<std::endl;
-
-    std::cout<<"CAMz: "<<m_camera.origin().z<<std::endl;
-
 
     glutPostRedisplay();
     
     
     
+}
+
+void SolarViewer::rescaleOuterPosition(){
+    for(int i = 0; i< NUMBER_PARTICLES;i++){
+        Vector3 distanceVertex = calculateVertexDistance(m_meshes[i]->getCurrentPosition(), Vector3(0.0f,0.0f,0.0f));
+        float norme = sqrt(pow(distanceVertex.x, 2) + pow(distanceVertex.y,2) + pow(distanceVertex.z,2));    
     
-    
-    
+    if(norme > 100000){
+        float rand = RandomFloat(-100, 100);
+        Vector3 position = Vector3(rand,rand,rand);
+        m_meshes[i]->setCurrentPosition(position);
+        Vector3 nullSpeed = Vector3(0.0f,0.0f,0.0f);
+        m_meshes[i]->setSpeed(nullSpeed);
+        std::cout<<"rescaling particles: "<<i<< " at position x:"<<m_meshes[i]->getCurrentPosition().x<<" y: "<< m_meshes[i]->getCurrentPosition().y<<" z: "<< m_meshes[i]->getCurrentPosition().z<<std::endl;
+    }
 }
 
 
 
 
+}
 
 
 
 
-
-//=============================================================================
