@@ -83,6 +83,7 @@ protected:
 public:
     void move(float timeElapsed, float totalTime);
     void rescaleOuterPosition();
+    void bringToInitialState();
 
 protected:
 	

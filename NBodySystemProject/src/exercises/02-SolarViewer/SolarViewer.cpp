@@ -269,8 +269,6 @@ keyboard(int key, int x, int y)
 		case 'h':
 			printf("Help:\n");
 			printf("'h'\t-\thelp\n");
-			printf("'t'\t-\ttoggle texture\n");
-			printf("'arrow keys\t-\tchange speed of rotation\n");
 			break;
 		case 't':
 			m_showTextureStars = !m_showTextureStars;
@@ -282,7 +280,7 @@ keyboard(int key, int x, int y)
 		case 'g':
 			m_geocentric = !m_geocentric;
 			break;
-		case ' ':
+        case ' ':
 			if(isWatchOn)
 			{
 				watch.stop();
@@ -380,22 +378,7 @@ draw_scene(DrawMode _draw_mode)
 	m_meshShaderTexture.setMatrix4x4Uniform("worldcamera", m_camera.getTransformation().Inverse());
 	m_meshShaderTexture.setMatrix4x4Uniform("projection", m_camera.getProjectionMatrix());
 	
-	
-	//stars
-    //	glDisable(GL_DEPTH_TEST);
-    //	m_Stars.setIdentity();
-    //	m_Stars.scaleObject(Vector3(m_starsScale, m_starsScale, m_starsScale));
-    //	m_Stars.translateWorld(Vector3(m_camera.origin()));
-    //	m_meshShaderTexture.setMatrix4x4Uniform("modelworld", m_Stars.getTransformation() );
-    //	m_Stars.getMaterial(0).m_diffuseTexture.bind();
-    //	m_meshShaderTexture.setIntUniform("texture", m_Stars.getMaterial(0).m_diffuseTexture.getLayer());
-    //	draw_object(m_meshShaderTexture, m_Stars);
-    //	glEnable(GL_DEPTH_TEST);
-    
-    //    m_meshShaderTexture.setMatrix4x4Uniform("modelworld", m_Sun.getTransformation() );
-    //	m_Sun.getMaterial(0).m_diffuseTexture.bind();
-    //	m_meshShaderTexture.setIntUniform("texture", m_Sun.getMaterial(0).m_diffuseTexture.getLayer());
-    //	draw_object(m_meshShaderTexture, m_Sun);
+
 	
 	m_meshShaderTexture.unbind();
     
@@ -527,8 +510,7 @@ draw_scene(DrawMode _draw_mode)
 	
 	// finally, unbind the shader
 	m_cubeShader.unbind();
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	//-------------------------------
+
 	
 	m_meshShaderDiffuse.bind();
 	
@@ -696,16 +678,18 @@ Vector3 SolarViewer::calculateVertexDistance(Vector3 a, Vector3 b){
 
 void SolarViewer::move(float dt, float totalTime){
 
-    
+    double averageDistanceB1 = 0.0;
+    double averageDistanceB2 = 0.0;
+    double averageDistanceB3 = 0.0;
+
     int timeToRescale = (int) (totalTime + 0.5);
     if(timeToRescale%50 == 0){
         rescaleOuterPosition();
         std::cout<<"rescaling----------------------"<<std::endl;
     }
 
-    std::cout<<"totalDays: "<<totalTime<<" TIME ELAPSED: "<<dt<<std::endl;
+//    std::cout<<"totalDays: "<<totalTime<<" TIME ELAPSED: "<<dt<<std::endl;
     for(int i= 0; i < NUMBER_PARTICLES;i++){
-
         Vector3 forceTot = calculateForces(m_meshes[i]);
         Vector3 distanceVertex = calculateVertexDistance(m_meshes[i]->getCurrentPosition(), Vector3(0.0f,0.0f,0.0f));
         float norme = sqrt(pow(distanceVertex.x, 2) + pow(distanceVertex.y,2) + pow(distanceVertex.z,2));
@@ -713,6 +697,14 @@ void SolarViewer::move(float dt, float totalTime){
         if(normeForce > 10000000000){
             forceTot = forceTot/1000000;
             
+        }
+        if(m_meshes[i]->getID() <200){
+            averageDistanceB1 += norme;
+            
+        }else if (m_meshes[i]->getID() >= 200 && m_meshes[i]->getID()<400) {
+            averageDistanceB2 += norme;
+        }else if(m_meshes[i]->getID() >= 400 && m_meshes[i]->getID()<NUMBER_PARTICLES){
+            averageDistanceB3 += norme;
         }
         //Calculate acceleration
         Vector3 a;
@@ -724,11 +716,7 @@ void SolarViewer::move(float dt, float totalTime){
         float normeSpeed = sqrt(pow(m_meshes[i]->getSpeed().x,2)+pow(m_meshes[i]->getSpeed().y,2)+pow(m_meshes[i]->getSpeed().z,2));
         
 
-        if(i==0){
-            std::cout<<"ID: "<<m_meshes[i]->getID()<<" Norme: "<<norme<<" Masse: "<<m_meshes[i]->getMass()<<" NORMEFORCE: "<< normeForce<<" x :"<<forceTot.x<<" y :"<<forceTot.y<<" z :"<<forceTot.z<<" NORMESPEED: "<<normeSpeed<<std::endl;
-
-        }
-            
+       
             
 
         //set the new position
@@ -736,6 +724,12 @@ void SolarViewer::move(float dt, float totalTime){
         m_meshes[i]->setCurrentPosition(Vector3 (m_meshes[i]->getCurrentPosition().x + dt*m_meshes[i]->getSpeed().x, m_meshes[i]->getCurrentPosition().y + dt*m_meshes[i]->getSpeed().y, m_meshes[i]->getCurrentPosition().z + dt*m_meshes[i]->getSpeed().z));
 
     }
+    
+    averageDistanceB1 = averageDistanceB1/200;
+    averageDistanceB2 = averageDistanceB2/200;
+    averageDistanceB3 = averageDistanceB3/200;
+
+    std::cout<<"Average distance is for: B1: "<<averageDistanceB1<<" B2: "<<averageDistanceB2<<" B3: "<<averageDistanceB3<<std::endl;
 
     glutPostRedisplay();
     
@@ -754,13 +748,30 @@ void SolarViewer::rescaleOuterPosition(){
         m_meshes[i]->setCurrentPosition(position);
         Vector3 nullSpeed = Vector3(0.0f,0.0f,0.0f);
         m_meshes[i]->setSpeed(nullSpeed);
-        std::cout<<"rescaling particles: "<<i<< " at position x:"<<m_meshes[i]->getCurrentPosition().x<<" y: "<< m_meshes[i]->getCurrentPosition().y<<" z: "<< m_meshes[i]->getCurrentPosition().z<<std::endl;
+
     }
 }
+    
 
+}
 
-
-
+void SolarViewer::bringToInitialState(){
+    
+    for(int i = 0; i < NUMBER_PARTICLES; i++){
+        Vector3 nullSpeed = Vector3(0.0f, 0.0f, 0.0f);
+        m_meshes[i]->setSpeed(nullSpeed);
+        float x = RandomFloat(-RANGE, RANGE);
+        float y = RandomFloat(-RANGE, RANGE);
+        float z = RandomFloat(-RANGE, RANGE);
+        Vector3 initPos = Vector3(x, y, z);
+        m_meshes[i]->setCurrentPosition(initPos);
+        m_meshes[i]->translateWorld(initPos);
+        if(i == 1 || i==450 || i==507){
+        std::cout<<"ID: "<<m_meshes[i]->getID()<<" x: "<<m_meshes[i]->getCurrentPosition().x<<" y: "<<m_meshes[i]->getCurrentPosition().y<<" z: "<<m_meshes[i]->getCurrentPosition().z<<" Speedx: "<<m_meshes[i]->getSpeed().x<<" Speedy: "<<m_meshes[i]->getSpeed().y<<" Speedz: "<<m_meshes[i]->getSpeed().z<<std::endl;
+        }
+        
+    }
+    
 }
 
 
